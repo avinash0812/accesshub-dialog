@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Request 2Actual Access — Task Module</title>
+<title>9Request Actual Access — Task Module</title>
 <style>
   :root{
     --brand:#0e5a73;           /* teal */
@@ -25,7 +25,7 @@
   .bar{display:flex;justify-content:space-between;align-items:center;margin:8px 0 16px}
   .bar-right{display:flex;align-items:center;gap:12px}
   .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn:hover{background:var(--brand-dark)}
   .row{display:flex;gap:16px;align-items:center;margin:6px 0}
   .row > *{flex:1}
@@ -98,7 +98,6 @@
   <section class="card" id="step2" style="display:none">
     <div class="hdr"><h1>Access Details</h1></div>
 
-    <!-- Description removed -->
     <div class="row">
       <div>
         <label class="req">Enter user name</label>
@@ -198,16 +197,26 @@
 
 <script>
 /* =================== STATIC DATA (POC) =================== */
+/* Realistic display names so the table shows actual names. */
 const allUsers = [
-  { alias:"akanoo", displayName:"User Display" }, { alias:"alexr", displayName:"User Display" },
-  { alias:"chenl",  displayName:"User Display" }, { alias:"dev_1", displayName:"User Display" },
-  { alias:"isham",  displayName:"User Display" }, { alias:"jdoe",  displayName:"User Display" },
-  { alias:"katew",  displayName:"User Display" }, { alias:"liamj", displayName:"User Display" },
-  { alias:"mshah",  displayName:"User Display" }, { alias:"ninad", displayName:"User Display" },
-  { alias:"olgap",  displayName:"User Display" }, { alias:"omarh", displayName:"User Display" },
-  { alias:"pk",     displayName:"User Display" }, { alias:"ravin", displayName:"User Display" },
-  { alias:"sarab",  displayName:"User Display" }, { alias:"timq",  displayName:"User Display" },
-  { alias:"vikz",   displayName:"User Display" }, { alias:"zedx",  displayName:"User Display" }
+  { alias:"akanoo", displayName:"A. Kanoo" },
+  { alias:"alexr",  displayName:"Alex Ritchie" },
+  { alias:"chenl",  displayName:"Lena Chen" },
+  { alias:"dev_1",  displayName:"Devendra Prasad" },
+  { alias:"isham",  displayName:"Isham Malik" },
+  { alias:"jdoe",   displayName:"John Doe" },
+  { alias:"katew",  displayName:"Kate Williams" },
+  { alias:"liamj",  displayName:"Liam Johnson" },
+  { alias:"mshah",  displayName:"Mira Shah" },
+  { alias:"ninad",  displayName:"Ninad Kulkarni" },
+  { alias:"olgap",  displayName:"Olga Petrova" },
+  { alias:"omarh",  displayName:"Omar Hassan" },
+  { alias:"pk",     displayName:"Priya Kapoor" },
+  { alias:"ravin",  displayName:"Ravi Nair" },
+  { alias:"sarab",  displayName:"Sara Bhandari" },
+  { alias:"timq",   displayName:"Tim Quinn" },
+  { alias:"vikz",   displayName:"Vikram Zaveri" },
+  { alias:"zedx",   displayName:"Zed Xu" }
 ].sort((a,b)=>a.alias.localeCompare(b.alias));
 
 /* =================== DOM HOOKS =================== */
@@ -263,24 +272,14 @@ function notifyParentClose(payload){
   try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
 }
 
-/* =================== SCREEN 1 (UNCHANGED LOGIC) =================== */
+/* =================== SCREEN 1 (UNCHANGED) =================== */
 let prAgreement = false;
 let prTraining  = false;
 function evalStep1(){
-  if(prAgreement){
-    agreementState.textContent = 'Agreement signed.'; agreementState.classList.remove('err'); agreementState.classList.add('ok');
-    markAgreement.disabled = true;
-  }else{
-    agreementState.textContent = 'Agreement is not signed.'; agreementState.classList.remove('ok'); agreementState.classList.add('err');
-    markAgreement.disabled = false;
-  }
-  if(prTraining){
-    trainingState.textContent = 'Training completed'; trainingState.classList.remove('err'); trainingState.classList.add('ok');
-    markTraining.disabled = true;
-  }else{
-    trainingState.textContent = 'Training is not completed'; trainingState.classList.remove('ok'); trainingState.classList.add('err');
-    markTraining.disabled = false;
-  }
+  if(prAgreement){ agreementState.textContent = 'Agreement signed.'; agreementState.classList.remove('err'); agreementState.classList.add('ok'); markAgreement.disabled = true; }
+  else{ agreementState.textContent = 'Agreement is not signed.'; agreementState.classList.remove('ok'); agreementState.classList.add('err'); markAgreement.disabled = false; }
+  if(prTraining){ trainingState.textContent = 'Training completed'; trainingState.classList.remove('err'); trainingState.classList.add('ok'); markTraining.disabled = true; }
+  else{ trainingState.textContent = 'Training is not completed'; trainingState.classList.remove('ok'); trainingState.classList.add('err'); markTraining.disabled = false; }
   refreshTopNext();
 }
 markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
@@ -288,21 +287,15 @@ markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
 
 /* =================== IST + FY HELPERS (STRING-SAFE) =================== */
-/* Get today's date in IST as 'YYYY-MM-DD' (safe for <input type="date">) */
 function todayISTYMD(){
-  return new Intl.DateTimeFormat('en-CA',{
-    timeZone:'Asia/Kolkata',
-    year:'numeric',month:'2-digit',day:'2-digit'
-  }).format(new Date());
+  return new Intl.DateTimeFormat('en-CA',{ timeZone:'Asia/Kolkata', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
 }
-/* Fiscal-year window (strings 'YYYY-MM-DD') based on IST "today" */
 function fyWindowStrings(todayStr){
   const [Y,M,D] = todayStr.split('-').map(Number);
-  const inSecondHalf = (M>7) || (M===7 && D>=25); // on/after Jul 25
+  const inSecondHalf = (M>7) || (M===7 && D>=25);
   const y = Y;
-  return inSecondHalf
-    ? { start: `${y}-07-25`, end: `${y+1}-06-26` }
-    : { start: `${y-1}-07-25`, end: `${y}-06-26` };
+  return inSecondHalf ? { start:`${y}-07-25`, end:`${y+1}-06-26` }
+                      : { start:`${y-1}-07-25`, end:`${y}-06-26` };
 }
 
 /* =================== SCREEN 2 =================== */
@@ -321,19 +314,29 @@ function validateDuration(){
   }
   dt.classList.toggle('invalid', !ok);
   dtHelp.classList.toggle('error', !ok);
-  refreshTopNext();
   return ok;
+}
+function step1Ready(){ return prAgreement && prTraining; }
+function step2Ready(){
+  const hasUsers = selected.size > 0;
+  const dateOk   = validateDuration();
+  return hasUsers && dateOk;
+}
+function refreshTopNext(){
+  if(current===1)       btnTopNext.disabled = !step1Ready();
+  else if(current===2)  btnTopNext.disabled = !step2Ready();
+  else                  btnTopNext.disabled = true;
 }
 
 /* Set default date = IST today (e.g., 2025-10-06) */
 (function presetDateToToday(){
   dt.value = todayISTYMD();
-  validateDuration();     // help shows grey/red appropriately
+  validateDuration();
+  refreshTopNext();
 })();
+dt.addEventListener('change', ()=>{ validateDuration(); refreshTopNext(); });
 
-dt.addEventListener('change', validateDuration);
-
-/* Users list + chips (Display name column) */
+/* Users list + chips (uses displayName) */
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
@@ -368,24 +371,13 @@ renderRows();
 searchBox.addEventListener('input', renderRows);
 btnClear.onclick = ()=>{ searchBox.value=''; selected.clear(); renderChips(); renderRows(); refreshTopNext(); };
 
-/* NEXT (top-right) logic across steps */
-function step1Ready(){ return prAgreement && prTraining; }
-function step2Ready(){ return selected.size>0 && validateDuration(); }
-
-function refreshTopNext(){
-  if(current===1){
-    btnTopNext.disabled = !step1Ready();
-  }else if(current===2){
-    btnTopNext.disabled = !step2Ready();
-  }else{
-    btnTopNext.disabled = true;
-  }
-}
-
+/* Top-right NEXT across steps */
 btnTopNext.onclick = ()=>{
   if(current===1 && step1Ready()){
-    show(2);
-  }else if(current===2 && step2Ready()){
+    show(2);                                 // move to Screen-2
+    return;
+  }
+  if(current===2 && step2Ready()){
     const when = dt.value.split('-').reverse().join('/'); // dd/mm/yyyy
     const list = Array.from(selected).sort().map(a=>`<li>${a}</li>`).join('');
     confirmText.innerHTML = `<div>Following users are selected for <strong>${when}</strong>:</div><ul>${list}</ul>`;
@@ -418,7 +410,7 @@ btnSubmit.onclick = ()=>{
      })
      .then(r => r.ok ? r.json() : Promise.reject(r))
      .then(resp => notifyParentClose({result:'ok', summary: payload, server: resp}))
-     .catch(err => alert('Failed to submit request'));
+     .catch(() => alert('Failed to submit request'));
   --------------------------------------------------------- */
 
   // POC: show compact feedback; on OK close TM.
