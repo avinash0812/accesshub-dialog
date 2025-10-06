@@ -1,51 +1,61 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Request Actual Access — Search</title>
 <style>
   :root{
-    --teams-bg:#f5f5f7;
-    --card:#ffffff;
-    --text:#242424;
-    --muted:#616161;
-    --border:#e0e0e0;
-    --primary:#2563eb;        /* Teams-ish primary */
-    --primary-pressed:#1e4fc7;
-    --secondary:#e9eef7;
+    --teams-bg:#f5f5f7; --card:#fff; --text:#1f2937; --muted:#6b7280;
+    --border:#e5e7eb; --primary:#2563eb; --primary-pressed:#1e4fc7;
+    --accent:#dbeafe; --pill:#eef2ff; --pill-text:#1e40af; --danger:#b91c1c;
     --radius:14px;
   }
-  html,body{margin:0;height:100%;font-family:Segoe UI, Arial, sans-serif;background:var(--teams-bg);color:var(--text)}
-  .wrap{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:32px}
+  html,body{margin:0;height:100%;background:var(--teams-bg);color:var(--text);
+    font-family:Segoe UI,Arial,sans-serif}
+  .wrap{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:24px}
   .card{width:min(1100px,95vw);background:var(--card);border:1px solid var(--border);
-        border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06);padding:24px 24px 16px}
-  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-  .title{font-size:20px;font-weight:700}
-  .toolbar{display:grid;gap:12px;grid-template-columns: 260px 160px 1fr 110px}
-  label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-  select,input[type="text"]{
-    width:100%;height:40px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-size:14px;
-    background:#fff;outline:none;
-  }
-  .btn{height:40px;border:0;border-radius:10px;cursor:pointer;font-weight:600;padding:0 16px}
+    border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06);padding:20px}
+  .title{font-weight:700;font-size:20px}
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .muted{color:var(--muted);font-size:12px}
+  .toolbar{display:grid;gap:10px;grid-template-columns:260px 140px 1fr 110px}
+  label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}
+  select,input[type="text"],input[type="date"]{height:40px;border:1px solid var(--border);
+    border-radius:10px;padding:0 12px;background:#fff;width:100%;font-size:14px;outline:none}
+  .btn{height:40px;border:0;border-radius:10px;padding:0 16px;cursor:pointer;font-weight:600}
   .btn.primary{background:var(--primary);color:#fff}
   .btn.primary:hover{background:var(--primary-pressed)}
-  .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--text)}
-  .btn-row{display:flex;gap:10px;margin-top:12px}
-  .muted{color:var(--muted);font-size:12px;margin-top:8px}
-  table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:18px}
-  thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 12px}
+  .btn.ghost{background:#fff;border:1px solid var(--border)}
+  .right{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+  .sep{height:1px;background:var(--border);margin:12px 0}
+  /* Table (tighter) */
+  table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
+  thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
   tbody tr{background:#fff;border:1px solid var(--border);border-radius:12px}
-  tbody td{padding:12px}
+  tbody td{padding:10px}
   tbody tr td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
   tbody tr td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
-  .pill{display:inline-block;background:#eef2ff;color:#1e40af;border-radius:999px;padding:2px 10px;font-size:12px}
-  .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
-  .count{font-size:12px;color:var(--muted)}
-  .sep{height:1px;background:var(--border);margin:14px 0}
-  .footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
-  .hidden{display:none}
+  .pill{display:inline-block;background:var(--pill);color:var(--pill-text);
+    border-radius:999px;padding:2px 10px;font-size:12px}
+  /* Selected users chips row */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--border);
+    border-radius:10px;min-height:44px}
+  .chip{background:var(--accent);color:#1e3a8a;border-radius:999px;padding:4px 10px;font-size:12px}
+  /* Section header with blue underline */
+  .section h3{margin:14px 0 6px;font-size:16px}
+  .underline{height:6px;background:#bfd2ff;border-radius:3px;margin:-4px 0 8px;width:280px}
+  /* Validation */
+  .error{color:var(--danger);font-size:12px;margin-top:6px}
+  /* Footer */
+  .footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;
+    align-items:center;justify-content:center;z-index:50}
+  .modal{background:#fff;border:1px solid var(--border);border-radius:14px;
+    width:min(560px,92vw);padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .modal h4{margin:0 0 8px}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
 </style>
 </head>
 <body>
@@ -53,10 +63,10 @@
   <div class="card" role="dialog" aria-label="Request Actual Access — Search">
     <div class="header">
       <div class="title">Request Actual Access — Search</div>
-      <div class="count"><span id="selCount">0</span> selected</div>
+      <div class="muted"><span id="selCount">0</span> selected</div>
     </div>
 
-    <!-- Toolbar -->
+    <!-- Search toolbar -->
     <div class="toolbar">
       <div>
         <label>Login User</label>
@@ -68,7 +78,6 @@
           <option value="User4">User4</option>
         </select>
       </div>
-
       <div>
         <label>Show</label>
         <select id="showCount">
@@ -78,44 +87,78 @@
           <option value="100">100</option>
         </select>
       </div>
-
       <div>
         <label>Search alias or name</label>
-        <input id="query" type="text" placeholder="e.g., akanoo or Ashish Kanoongo" />
+        <input id="query" type="text" placeholder="e.g., akanoo or Ashish Kanoongo"/>
       </div>
-
       <div class="right">
-        <button id="btnSearch" class="btn primary" title="Filter list">Search</button>
+        <button id="btnSearch" class="btn primary">Search</button>
       </div>
     </div>
 
-    <div class="muted">
-      • Search is **button-based** (no type-ahead) for performance. • Filters on alias or name. • Always sorted by alias (A→Z).
+    <div class="muted" style="margin-top:6px">
+      Button-based search (no type-ahead) for performance. Sorted by alias A→Z.
     </div>
 
     <div class="sep"></div>
 
-    <!-- Results -->
-    <div id="results">
-      <table aria-label="Search results">
-        <thead>
-          <tr>
-            <th style="width:44px;"><input id="chkAll" type="checkbox" title="Select all on page" /></th>
-            <th style="width:140px;">Alias</th>
-            <th>Name</th>
-            <th style="width:160px;">Login User</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+    <!-- Selected Users -->
+    <div class="section">
+      <h3>Selected Users</h3>
+      <div class="underline"></div>
+      <div id="chipRow" class="chips" aria-live="polite"></div>
+    </div>
+
+    <!-- Results table -->
+    <table aria-label="Search results">
+      <thead>
+        <tr>
+          <th style="width:44px;"><input id="chkAll" type="checkbox" title="Select all on page"/></th>
+          <th style="width:140px;">Alias</th>
+          <th>Name</th>
+          <th style="width:160px;">Login User</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div class="sep"></div>
+
+    <!-- Access Duration -->
+    <div class="section">
+      <h3>Access Duration</h3>
+      <div class="underline"></div>
+      <label for="dt">Enter Duration <span style="color:#b91c1c">*</span></label>
+      <div style="display:grid;grid-template-columns:260px auto;gap:12px;align-items:center">
+        <input id="dt" type="date"/>
+        <div class="muted">
+          <div>Note:</div>
+          <div>1. Date cannot be today or before today.</div>
+          <div>2. Date cannot be after the current fiscal year end (Jul&nbsp;25 → Jun&nbsp;26).</div>
+        </div>
+      </div>
+      <div id="dtErr" class="error" role="alert" aria-live="polite"></div>
     </div>
 
     <div class="footer">
-      <span class="muted">Tip: press Search after changing any field.</span>
+      <span class="muted">Review selections and choose a valid duration.</span>
       <div class="right">
         <button class="btn ghost" onclick="window.close()">Close</button>
-        <button id="btnSubmit" class="btn primary">Submit</button>
+        <button id="btnNext" class="btn primary">Next</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Centered modal -->
+<div id="modalHost" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <h4 id="modalTitle">Confirm submission</h4>
+    <div id="modalBody" class="muted"></div>
+    <div class="sep"></div>
+    <div class="right">
+      <button id="btnCancel" class="btn ghost">Cancel</button>
+      <button id="btnConfirm" class="btn primary">Confirm</button>
     </div>
   </div>
 </div>
@@ -155,48 +198,40 @@ const elQuery   = document.getElementById('query');
 const elRows    = document.getElementById('rows');
 const elSelCnt  = document.getElementById('selCount');
 const elChkAll  = document.getElementById('chkAll');
+const elChipRow = document.getElementById('chipRow');
+const elDt      = document.getElementById('dt');
+const elDtErr   = document.getElementById('dtErr');
+const modalHost = document.getElementById('modalHost');
+const modalBody = document.getElementById('modalBody');
 
-/* ---------- Helpers ---------- */
+/* ---------- QS init ---------- */
 const qs = new URLSearchParams(location.search);
 function initFromQuery(){
-  // Preselect from querystring if provided
   const qUser = qs.get('loginuser');
   const qShow = qs.get('show');
   const qText = qs.get('q');
-
-  if (qUser) {
-    // Support "All" and user keys; keep “All (User1+User3)” label.
-    if (["All","User1","User2","User3","User4"].includes(qUser)) {
-      elLogin.value = qUser;
-    }
-  }
+  if (["All","User1","User2","User3","User4"].includes(qUser)) elLogin.value = qUser;
   if (qShow && !Number.isNaN(+qShow)) elShow.value = qShow;
   if (qText) elQuery.value = qText;
 }
 
+/* ---------- Data view ---------- */
 function currentDataset(){
-  if (elLogin.value === "All") {
-    // Club User1 + User3 as requested
+  if (elLogin.value === "All")
     return DATA.filter(x => x.loginuser === "User1" || x.loginuser === "User3");
-  }
   return DATA.filter(x => x.loginuser === elLogin.value);
 }
 
 function search(){
   const q = (elQuery.value || "").trim().toLowerCase();
   let list = currentDataset();
-
   if (q){
     list = list.filter(x =>
       x.alias.toLowerCase().includes(q) ||
       (x.name||"").toLowerCase().includes(q)
     );
   }
-
-  // Sort by alias A→Z always
   list.sort((a,b)=> a.alias.localeCompare(b.alias));
-
-  // Page size
   const take = Math.max(1, +elShow.value || 20);
   render(list.slice(0, take));
 }
@@ -207,58 +242,134 @@ function render(items){
   updateCount();
 
   if (!items.length){
-    elRows.innerHTML = `<tr><td colspan="4" class="muted" style="padding:18px;">No results.</td></tr>`;
+    elRows.innerHTML = `<tr><td colspan="4" class="muted" style="padding:16px;">No results.</td></tr>`;
     return;
   }
 
   for (const it of items){
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="checkbox" class="rowchk" data-alias="${it.alias}"></td>
+      <td><input type="checkbox" class="rowchk" data-alias="${it.alias}" data-name="${escapeHtml(it.name||"")}"></td>
       <td><span class="pill">${it.alias}</span></td>
       <td>${escapeHtml(it.name||"")}</td>
-      <td>${it.loginuser}</td>
-    `;
+      <td>${it.loginuser}</td>`;
     elRows.appendChild(tr);
   }
 
-  // Selection handlers
-  for (const cb of document.querySelectorAll('.rowchk')){
-    cb.addEventListener('change', updateCount);
-  }
+  document.querySelectorAll('.rowchk').forEach(cb=>{
+    cb.addEventListener('change', ()=>{ updateCount(); renderChips(); });
+  });
+  renderChips();
+}
+
+function getSelectedAliases(){
+  return [...document.querySelectorAll('.rowchk:checked')].map(x=>x.dataset.alias);
+}
+function getSelectedNames(){
+  return [...document.querySelectorAll('.rowchk:checked')].map(x=>x.dataset.name);
 }
 
 function updateCount(){
-  const n = document.querySelectorAll('.rowchk:checked').length;
-  elSelCnt.textContent = n;
+  elSelCnt.textContent = getSelectedAliases().length;
 }
 
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
+function renderChips(){
+  const aliases = getSelectedAliases();
+  elChipRow.innerHTML = aliases.length
+    ? aliases.map(a=>`<span class="chip mono">${a}</span>`).join("")
+    : `<span class="muted">No users selected.</span>`;
+}
+
+/* ---------- Date rules ---------- */
+function fiscalBounds(d){
+  // FY: Jul 25 -> Jun 26
+  const y = d.getFullYear();
+  const july25_this = new Date(y, 6, 25); // month 6 = July
+  let start, end;
+  if (d >= july25_this){
+    start = new Date(y, 6, 25);
+    end   = new Date(y+1, 5, 26); // Jun 26 next year
+  } else {
+    start = new Date(y-1, 6, 25);
+    end   = new Date(y, 5, 26);   // Jun 26 this year
+  }
+  return {start,end};
+}
+function toISO(d){ return d.toISOString().slice(0,10); }
+function formatDMY(d){
+  return String(d.getDate()).padStart(2,'0') + "/" +
+         String(d.getMonth()+1).padStart(2,'0') + "/" +
+         d.getFullYear();
+}
+function validateDate(){
+  elDtErr.textContent = "";
+  if (!elDt.value) return false;
+  const picked = new Date(elDt.value + "T00:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  if (+picked <= +today){ elDtErr.textContent = "Please choose a date after today."; return false; }
+  const {end} = fiscalBounds(today);
+  if (+picked > +end){ elDtErr.textContent = `Date must be on or before ${formatDMY(end)} (FY end).`; return false; }
+  return true;
+}
+
+/* ---------- Modal ---------- */
+function openModal(html){
+  modalBody.innerHTML = html;
+  modalHost.style.display = "flex";
+  modalHost.setAttribute("aria-hidden","false");
+}
+function closeModal(){
+  modalHost.style.display = "none";
+  modalHost.setAttribute("aria-hidden","true");
 }
 
 /* ---------- Events ---------- */
 document.getElementById('btnSearch').addEventListener('click', search);
 elLogin.addEventListener('change', search);
 elShow.addEventListener('change', search);
-elChkAll.addEventListener('change', () => {
+elChkAll.addEventListener('change', ()=>{
   const checks = document.querySelectorAll('.rowchk');
-  for (const cb of checks) cb.checked = elChkAll.checked;
-  updateCount();
+  checks.forEach(cb => cb.checked = elChkAll.checked);
+  updateCount(); renderChips();
+});
+elDt.addEventListener('change', validateDate);
+
+document.getElementById('btnNext').addEventListener('click', ()=>{
+  if (!validateDate()) { elDt.focus(); return; }
+  const aliases = getSelectedAliases();
+  const when = new Date(elDt.value + "T00:00:00");
+  const list = aliases.length ? aliases.map(a=>`<div class="mono">${a}</div>`).join("") : "<div>(none selected)</div>";
+  openModal(`
+    <div>Following user(s) are selected for <b>${formatDMY(when)}</b>:</div>
+    <div style="margin-top:8px">${list}</div>
+  `);
 });
 
-document.getElementById('btnSubmit').addEventListener('click', () => {
-  const picked = [...document.querySelectorAll('.rowchk:checked')].map(x=>x.dataset.alias);
-  // POC: show what we’d return to the bot/task module
-  alert(`Submitting ${picked.length} selection(s): ${picked.join(', ') || '(none)'}`);
-  // In production, postMessage to Teams/Parent or call your API here.
+document.getElementById('btnCancel').addEventListener('click', closeModal);
+document.getElementById('btnConfirm').addEventListener('click', ()=>{
+  const payload = {
+    loginUser: elLogin.value,
+    date: elDt.value,
+    aliases: getSelectedAliases()
+  };
+  // POC: show result. In production, postMessage or call API.
+  alert("Submitting:\n" + JSON.stringify(payload,null,2));
+  closeModal();
 });
 
 /* ---------- Boot ---------- */
-initFromQuery();
-search();
+(function boot(){
+  // set date bounds in control (min: tomorrow, max: FY end)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(+today + 86400000);
+  const {end} = fiscalBounds(today);
+  elDt.min = toISO(tomorrow);
+  elDt.max = toISO(end);
+
+  initFromQuery();
+  search();
+})();
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 </script>
 </body>
 </html>
