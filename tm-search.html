@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Request 2Actual Access — Task Module</title>
+<title>Request Actual Access — 2Task Module</title>
 <style>
   :root{
     --brand:#0e5a73;           /* buttons/links */
@@ -63,7 +63,8 @@
 <div class="shell">
   <div class="bar">
     <div class="center-actions">
-      <button class="btn ghost" id="btnBack">&larr; Back</button>
+      <!-- CHANGED: Back uses 'secondary' to match your background scheme -->
+      <button class="btn secondary" id="btnBack">&larr; Back</button>
       <button class="btn flat" id="btnClose">Close</button>
     </div>
     <strong>Request Actual Access</strong>
@@ -76,14 +77,16 @@
     <div class="space"></div>
     <div class="row">
       <div style="flex:0 0 180px;"><label class="req">Agreement</label></div>
-      <div><span id="agreementState" class="ok">Agreement signed.</span></div>
+      <!-- CHANGED: default shows NOT signed (red) -->
+      <div><span id="agreementState" class="err">Agreement is not signed.</span></div>
       <div style="flex:0 0 200px;text-align:right">
         <button class="btn secondary" id="markAgreement">Mark completed</button>
       </div>
     </div>
     <div class="row">
       <div style="flex:0 0 180px;"><label class="req">Training</label></div>
-      <div><span id="trainingState" class="ok">Training Completed</span></div>
+      <!-- CHANGED: default shows NOT completed (red) -->
+      <div><span id="trainingState" class="err">Training is not completed</span></div>
       <div style="flex:0 0 200px;text-align:right">
         <button class="btn secondary" id="markTraining">Mark completed</button>
       </div>
@@ -231,6 +234,8 @@ const btnClose = document.getElementById('btnClose');
 
 const markAgreement = document.getElementById('markAgreement');
 const markTraining = document.getElementById('markTraining');
+const agreementState = document.getElementById('agreementState');
+const trainingState  = document.getElementById('trainingState');
 const step1Err = document.getElementById('step1Err');
 const toStep2 = document.getElementById('toStep2');
 
@@ -277,11 +282,40 @@ function notifyParentClose(payload){
 }
 
 /* =================== STEP 1: Pre-req =================== */
-let prAgreement = true; // preset complete (demo)
-let prTraining  = true;
+/* CHANGED: defaults are NOT completed */
+let prAgreement = false;
+let prTraining  = false;
 
 function evalStep1(){
   step1Err.style.display = 'none';
+
+  // Update Agreement text + colors + button
+  if(prAgreement){
+    agreementState.textContent = 'Agreement signed.';
+    agreementState.classList.remove('err');
+    agreementState.classList.add('ok');
+    markAgreement.disabled = true;
+  }else{
+    agreementState.textContent = 'Agreement is not signed.';
+    agreementState.classList.remove('ok');
+    agreementState.classList.add('err');
+    markAgreement.disabled = false;
+  }
+
+  // Update Training text + colors + button
+  if(prTraining){
+    trainingState.textContent = 'Training completed';
+    trainingState.classList.remove('err');
+    trainingState.classList.add('ok');
+    markTraining.disabled = true;
+  }else{
+    trainingState.textContent = 'Training is not completed';
+    trainingState.classList.remove('ok');
+    trainingState.classList.add('err');
+    markTraining.disabled = false;
+  }
+
+  // Next enabled only when both are completed
   toStep2.disabled = !(prAgreement && prTraining);
 }
 markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
@@ -407,18 +441,17 @@ bz.addEventListener('input', validateBZ);
 btnSubmit.onclick = ()=>{
   if(!validateBZ()) return;
 
-  /* ----- PUSH: create request (Power Automate / API) -----
-     const payload = {
-       date: dt.value,
-       users: Array.from(selected),
-       newTitle: newTitle.value,
-       justification: bz.value.trim()
-     };
-     fetch('<<YOUR_API_URL>>', {
-       method:'POST', headers:{'content-type':'application/json'},
-       body: JSON.stringify(payload)
-     }).then(r=>r.json()).then(() => notifyParentClose({result:'ok', summary:payload}));
-  --------------------------------------------------------- */
+  /* ----- PUSH: create request (Power Automate / API) ----- */
+  // const payload = {
+  //   date: dt.value,
+  //   users: Array.from(selected),
+  //   newTitle: newTitle.value,
+  //   justification: bz.value.trim()
+  // };
+  // fetch('<<YOUR_API_URL>>', {
+  //   method:'POST', headers:{'content-type':'application/json'},
+  //   body: JSON.stringify(payload)
+  // }).then(r=>r.json()).then(() => notifyParentClose({result:'ok', summary:payload}));
 
   // POC: show compact feedback; on OK close TM.
   feedback.style.display='flex';
@@ -427,19 +460,12 @@ btnSubmit.onclick = ()=>{
 /* FEEDBACK */
 fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
 fbOK.onclick = ()=>{
-  /* ----- PUSH: store feedback (optional) -----
-     fetch('<<FEEDBACK_API>>',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:fb.value})})
-  ------------------------------------------------*/
+  // fetch('<<FEEDBACK_API>>',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:fb.value})})
   feedback.style.display='none';
   notifyParentClose({result:'ok', feedback: fb.value});
 };
 
-/* ----- PULL: preload data if needed -----
-   Example:
-   fetch('<<RETRIEVE_USERS_FOR_LOGIN_USER>>')
-     .then(r=>r.json()).then(list => { ... });
------------------------------------------- */
+/* ----- PULL: preload data if needed ----- */
 </script>
 </body>
 </html>
-
