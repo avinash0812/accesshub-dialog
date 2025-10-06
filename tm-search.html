@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>4Request Actual Access — Task Module</title>
+<title>5Request Actual Access — Task Module</title>
 <style>
   :root{
-    --brand:#0e5a73;           /* teal (unchanged) */
+    --brand:#0e5a73;           /* teal */
     --brand-dark:#0b495d;
     --fg:#0f172a;
     --muted:#6b7280;
@@ -14,7 +14,7 @@
     --card:#ffffff;
     --danger:#b91c1c;
     --ok:#065f46;
-    --row-h:32px;
+    --row-h:32px;              /* compact rows */
     --radius:10px;
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
@@ -44,7 +44,7 @@
   .help{font-size:12px; margin-top:6px; color:var(--muted)}
   .help.error{color:var(--danger)}
   .ok{color:var(--ok);font-weight:700}
-  .err{color:var(--danger)} /* (status red; not bold) */
+  .err{color:var(--danger)} /* red (not bold) */
   .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
   .list th, .list td{padding:6px 10px; border-bottom:1px solid #eef2f7}
   .list tr{height:var(--row-h)}
@@ -66,8 +66,9 @@
 <div class="shell">
   <div class="bar">
     <div class="center-actions">
-      <!-- Back removed -->
-      <button class="btn flat" id="btnClose">Close</button>
+      <!-- FILLED TEAL buttons on the left -->
+      <button class="btn" id="btnBack">← Back</button>
+      <button class="btn" id="btnClose">Close</button>
     </div>
     <div class="bar-right">
       <strong>Request Actual Access</strong>
@@ -75,7 +76,7 @@
     </div>
   </div>
 
-  <!-- STEP 1: PRE-REQ (LOCKED until both completed) -->
+  <!-- ================== STEP 1: PRE-REQ (UNTOUCHED) ================== -->
   <section class="card" id="step1">
     <div class="hdr"><h1>Pre-Requisites</h1></div>
     <div class="muted">Ensuring privacy … (static copy for POC)</div>
@@ -96,12 +97,11 @@
     </div>
   </section>
 
-  <!-- STEP 2: USERS + DURATION -->
+  <!-- ================== STEP 2: USERS + DURATION ================== -->
   <section class="card" id="step2" style="display:none">
     <div class="hdr"><h1>Access Details</h1></div>
 
-    <!-- Description row removed -->
-
+    <!-- Description removed -->
     <div class="row">
       <div>
         <label class="req">Enter user name</label>
@@ -122,6 +122,7 @@
       <div style="max-width:320px">
         <label class="req">Enter Duration</label>
         <input type="date" id="dt" />
+        <!-- single line help; grey when OK, red when invalid -->
         <div id="dtHelp" class="help">
           The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).
         </div>
@@ -136,7 +137,7 @@
     </table>
   </section>
 
-  <!-- STEP 3: TITLE + JUSTIFICATION -->
+  <!-- ================== STEP 3: TITLE + JUSTIFICATION ================== -->
   <section class="card" id="step3" style="display:none">
     <div class="hdr"><h1>Title & Business Justification</h1></div>
 
@@ -175,9 +176,7 @@
 <div class="modal" id="confirm">
   <div class="panel">
     <div class="head">Confirm selection</div>
-    <div class="body">
-      <div id="confirmText"></div>
-    </div>
+    <div class="body"><div id="confirmText"></div></div>
     <div class="foot">
       <button class="btn ghost" id="cCancel">Cancel</button>
       <button class="btn" id="cOK">Confirm</button>
@@ -219,6 +218,7 @@ const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
 
+const btnBack = document.getElementById('btnBack');
 const btnClose = document.getElementById('btnClose');
 const btnTopNext = document.getElementById('btnTopNext');
 
@@ -249,7 +249,7 @@ const fb = document.getElementById('fb');
 const fbCancel = document.getElementById('fbCancel');
 const fbOK = document.getElementById('fbOK');
 
-/* =================== NAV =================== */
+/* =================== NAV & CLOSE =================== */
 let current = 1;
 function show(step){
   step1.style.display = step===1?'block':'none';
@@ -258,34 +258,28 @@ function show(step){
   current = step;
   refreshTopNext();
 }
-btnClose.onclick = () => notifyParentClose();
+btnBack.onclick = ()=> show(1);
+btnClose.onclick = ()=> notifyParentClose();
 function notifyParentClose(payload){
   try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
 }
 
-/* =================== STEP 1: Pre-req (LOCK) =================== */
+/* =================== SCREEN 1 (UNCHANGED LOGIC) =================== */
 let prAgreement = false;
 let prTraining  = false;
-
 function evalStep1(){
-  // Agreement
   if(prAgreement){
-    agreementState.textContent = 'Agreement signed.';
-    agreementState.classList.remove('err'); agreementState.classList.add('ok');
+    agreementState.textContent = 'Agreement signed.'; agreementState.classList.remove('err'); agreementState.classList.add('ok');
     markAgreement.disabled = true;
   }else{
-    agreementState.textContent = 'Agreement is not signed.';
-    agreementState.classList.remove('ok'); agreementState.classList.add('err');
+    agreementState.textContent = 'Agreement is not signed.'; agreementState.classList.remove('ok'); agreementState.classList.add('err');
     markAgreement.disabled = false;
   }
-  // Training
   if(prTraining){
-    trainingState.textContent = 'Training completed';
-    trainingState.classList.remove('err'); trainingState.classList.add('ok');
+    trainingState.textContent = 'Training completed'; trainingState.classList.remove('err'); trainingState.classList.add('ok');
     markTraining.disabled = true;
   }else{
-    trainingState.textContent = 'Training is not completed';
-    trainingState.classList.remove('ok'); trainingState.classList.add('err');
+    trainingState.textContent = 'Training is not completed'; trainingState.classList.remove('ok'); trainingState.classList.add('err');
     markTraining.disabled = false;
   }
   refreshTopNext();
@@ -294,35 +288,38 @@ markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
 markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
 
-/* =================== STEP 2: Users + Duration =================== */
+/* =================== IST HELPERS & FY WINDOWS (STRING-BASED) =================== */
+/* Get today's date in IST as 'YYYY-MM-DD' (safe for <input type="date">) */
+function todayISTYMD(){
+  return new Intl.DateTimeFormat('en-CA',{
+    timeZone:'Asia/Kolkata',
+    year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date());
+}
+/* Fiscal-year window (strings 'YYYY-MM-DD') based on IST "today" */
+function fyWindowStrings(todayStr){ // todayStr = 'YYYY-MM-DD'
+  const [Y,M,D] = todayStr.split('-').map(Number);
+  const inSecondHalf = (M>7) || (M===7 && D>=25); // on/after Jul 25
+  const y = Y;
+  if(inSecondHalf){
+    return { start: `${y}-07-25`, end: `${y+1}-06-26` };
+  }else{
+    return { start: `${y-1}-07-25`, end: `${y}-06-26` };
+  }
+}
+
+/* =================== SCREEN 2 =================== */
 let selected = new Set();
 
-/* IST helpers & FY validation */
-function nowIST(){
-  const now = new Date();
-  const istOffsetMin = 330; // +05:30
-  return new Date(now.getTime() + (istOffsetMin - now.getTimezoneOffset())*60000);
-}
-function dateFromInputIST(str){ return new Date(str + "T00:00:00+05:30"); }
-function fyWindowFor(todayIST){
-  const y = todayIST.getFullYear();
-  const jul25This  = new Date(`${y}-07-25T00:00:00+05:30`);
-  const jun26Next  = new Date(`${y+1}-06-26T23:59:59+05:30`);
-  const jul25Prev  = new Date(`${y-1}-07-25T00:00:00+05:30`);
-  const jun26This  = new Date(`${y}-06-26T23:59:59+05:30`);
-  return (todayIST >= jul25This) ? {start: jul25This, end: jun26Next}
-                                 : {start: jul25Prev, end: jun26This};
-}
-
 function validateDuration(){
-  const val = dt.value;
-  const today = nowIST();
-  const {start,end} = fyWindowFor(today);
+  const chosen = dt.value;                  // 'YYYY-MM-DD'
+  const today  = todayISTYMD();             // IST today as 'YYYY-MM-DD'
+  const {start,end} = fyWindowStrings(today);
+
   let ok = false;
-  if(val){
-    const chosen = dateFromInputIST(val);
-    const isAfterToday = chosen > new Date(today.toDateString()); // strictly after today
-    const inFY = (chosen>=start && chosen<=end);
+  if(chosen){
+    const isAfterToday = chosen > today;    // strictly after today
+    const inFY = (chosen >= start && chosen <= end);
     ok = isAfterToday && inFY;
   }
   dt.classList.toggle('invalid', !ok);
@@ -331,18 +328,15 @@ function validateDuration(){
   return ok;
 }
 
-/* preset date = **today IST** (10/06/2025 for 6 Oct 2025, 9:17 PM IST) */
+/* Set default date = IST today (e.g., 2025-10-06) */
 (function presetDateToToday(){
-  const t = nowIST();
-  const yyyy = t.getFullYear();
-  const mm = String(t.getMonth()+1).padStart(2,'0');
-  const dd = String(t.getDate()).padStart(2,'0');
-  dt.value = `${yyyy}-${mm}-${dd}`; // shows today's date per IST
-  validateDuration();               // will be invalid until a later date is chosen
+  dt.value = todayISTYMD();
+  validateDuration();     // help will show grey/red appropriately
 })();
+
 dt.addEventListener('change', validateDuration);
 
-/* list rendering */
+/* Users list + chips */
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
@@ -376,18 +370,20 @@ renderRows();
 searchBox.addEventListener('input', renderRows);
 btnClear.onclick = ()=>{ searchBox.value=''; selected.clear(); renderChips(); renderRows(); refreshTopNext(); };
 
-/* Top NEXT behavior & enablement across steps */
+/* NEXT (top-right) logic across steps */
 function step1Ready(){ return prAgreement && prTraining; }
 function step2Ready(){ return selected.size>0 && validateDuration(); }
+
 function refreshTopNext(){
   if(current===1){
     btnTopNext.disabled = !step1Ready();
   }else if(current===2){
     btnTopNext.disabled = !step2Ready();
   }else{
-    btnTopNext.disabled = true; // hidden/unused on step 3
+    btnTopNext.disabled = true;
   }
 }
+
 btnTopNext.onclick = ()=>{
   if(current===1 && step1Ready()){
     show(2);
@@ -398,10 +394,12 @@ btnTopNext.onclick = ()=>{
     confirm.style.display='flex';
   }
 };
-document.getElementById('cCancel').onclick = ()=> confirm.style.display='none';
-document.getElementById('cOK').onclick = ()=>{ confirm.style.display='none'; show(3); };
 
-/* =================== STEP 3 =================== */
+/* CONFIRM → STEP 3 */
+cCancel.onclick = ()=> confirm.style.display='none';
+cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
+
+/* STEP 3 */
 function validateBZ(){ const ok = bz.value.trim().length>0; bzErr.style.display = ok?'none':'block'; return ok; }
 bz.addEventListener('input', validateBZ);
 btnSubmit.onclick = ()=>{ if(!validateBZ()) return; feedback.style.display='flex'; };
