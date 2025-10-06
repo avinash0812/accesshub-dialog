@@ -16,7 +16,7 @@
     --ok:#065f46;
     --row-h:28px;              /* tighter rows */
     --radius:10px;
-    --btnw:96px;               /* consistent button width everywhere */
+    --btnw:96px;               /* consistent button width */
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
   .shell{max-width:1100px;margin:24px auto;padding:0 16px;}
@@ -52,6 +52,7 @@
   .section-title{margin:10px 0 6px;font-size:18px;border-top:3px solid #5b9bd5;padding-top:10px}
   .space{height:6px}
   .hide{display:none}
+
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px}
   .modal .panel{background:#fff;width:min(680px,96vw);border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2)}
@@ -74,7 +75,7 @@
     </div>
   </div>
 
-  <!-- ================== STEP 1: PRE-REQ (UNCHANGED) ================== -->
+  <!-- ========== STEP 1 (unchanged) ========== -->
   <section class="card" id="step1">
     <div class="hdr"><h1>Pre-Requisites</h1></div>
     <div class="muted">Ensuring privacy … (static copy for POC)</div>
@@ -95,7 +96,7 @@
     </div>
   </section>
 
-  <!-- ================== STEP 2: USERS + DURATION ================== -->
+  <!-- ========== STEP 2 (unchanged visuals from your last working) ========== -->
   <section class="card" id="step2" style="display:none">
     <div class="hdr"><h1>Access Details</h1></div>
 
@@ -133,12 +134,12 @@
     </table>
   </section>
 
-  <!-- ================== STEP 3: TITLE + JUSTIFICATION ================== -->
+  <!-- ========== STEP 3 (fixed alignment) ========== -->
   <section class="card" id="step3" style="display:none">
     <div class="hdr"><h1>Title & Business Justification</h1></div>
 
     <div class="grid-2">
-      <!-- Row 1: current/new titles -->
+      <!-- Row 1 -->
       <div>
         <label>Current title</label>
         <div class="pill" title="from HR system">Soft-Architect-Service</div>
@@ -153,14 +154,14 @@
         </select>
       </div>
 
-      <!-- Row 2: Business Justification spans BOTH columns and aligns to right edge of dropdown -->
+      <!-- Row 2: textarea spans both columns so its RIGHT EDGE matches the dropdown -->
       <div style="grid-column:1 / 3">
         <label class="req">Business Justification</label>
         <textarea id="bz"></textarea>
         <div id="bzErr" class="err" style="display:none">Business justification is required.</div>
       </div>
 
-      <!-- Row 3: Submit on its own row, right aligned -->
+      <!-- Row 3: Submit on new row, right aligned -->
       <div style="grid-column:1 / 3; text-align:right; margin-top:4px">
         <button class="btn" id="btnSubmit">Submit</button>
       </div>
@@ -180,13 +181,13 @@
   </div>
 </div>
 
-<!-- FEEDBACK -->
+<!-- FEEDBACK (textarea right-aligned with OK) -->
 <div class="modal" id="feedback">
   <div class="panel">
     <div class="head">Feedback</div>
     <div class="body">
       <div class="muted" style="margin-bottom:8px">Optional: share quick feedback about this flow.</div>
-      <textarea id="fb" style="min-height:110px"></textarea>
+      <textarea id="fb" style="min-height:110px;width:100%"></textarea>
     </div>
     <div class="foot">
       <button class="btn" id="fbCancel">Cancel</button>
@@ -196,7 +197,7 @@
 </div>
 
 <script>
-/* =================== STATIC DATA (POC) =================== */
+/* ===== STATIC DATA (POC) ===== */
 const allUsers = [
   { alias:"akanoo", displayName:"A. Kanoo" },
   { alias:"alexr",  displayName:"Alex Ritchie" },
@@ -218,7 +219,7 @@ const allUsers = [
   { alias:"zedx",   displayName:"Zed Xu" }
 ].sort((a,b)=>a.alias.localeCompare(b.alias));
 
-/* =================== DOM HOOKS =================== */
+/* ===== DOM ===== */
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
@@ -254,23 +255,23 @@ const fb = document.getElementById('fb');
 const fbCancel = document.getElementById('fbCancel');
 const fbOK = document.getElementById('fbOK');
 
-/* =================== NAV & CLOSE =================== */
+/* ===== NAV ===== */
 let current = 1;
 function show(step){
   step1.style.display = step===1?'block':'none';
   step2.style.display = step===2?'block':'none';
   step3.style.display = step===3?'block':'none';
   current = step;
-  btnBack.classList.toggle('hide', current===1);   // hide on Screen-1 only
+  btnBack.classList.toggle('hide', current===1); // hide on first screen
   refreshTopNext();
 }
-btnBack.onclick = ()=> show(current>1 ? current-1 : 1); // from 3 -> 2
+btnBack.onclick  = ()=> show(current>1 ? current-1 : 1); // from 3 -> 2
 btnClose.onclick = ()=> notifyParentClose();
 function notifyParentClose(payload){
   try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
 }
 
-/* =================== SCREEN 1 (UNCHANGED) =================== */
+/* ===== SCREEN 1 state ===== */
 let prAgreement = false;
 let prTraining  = false;
 function evalStep1(){
@@ -284,7 +285,7 @@ markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
 markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
 
-/* =================== IST + FY HELPERS =================== */
+/* ===== IST + FY ===== */
 function todayISTYMD(){
   return new Intl.DateTimeFormat('en-CA',{ timeZone:'Asia/Kolkata', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
 }
@@ -296,17 +297,16 @@ function fyWindowStrings(todayStr){
                       : { start:`${y-1}-07-25`, end:`${y}-06-26` };
 }
 
-/* =================== SCREEN 2 =================== */
+/* ===== SCREEN 2 ===== */
 let selected = new Set();
 
 function validateDuration(){
   const chosen = dt.value;
   const today  = todayISTYMD();
   const {start,end} = fyWindowStrings(today);
-
   let ok = false;
   if(chosen){
-    const isAfterToday = chosen > today;    // strictly after today
+    const isAfterToday = chosen > today;
     const inFY = (chosen >= start && chosen <= end);
     ok = isAfterToday && inFY;
   }
@@ -321,8 +321,6 @@ function refreshTopNext(){
   else if(current===2) btnTopNext.disabled = !step2Ready();
   else                 btnTopNext.disabled = true;
 }
-
-/* default date = IST today */
 (function presetDateToToday(){
   dt.value = todayISTYMD();
   validateDuration();
@@ -330,7 +328,6 @@ function refreshTopNext(){
 })();
 dt.addEventListener('change', ()=>{ validateDuration(); refreshTopNext(); });
 
-/* Users list + chips */
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
@@ -383,7 +380,7 @@ btnTopNext.onclick = ()=>{
 cCancel.onclick = ()=> confirm.style.display='none';
 cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
 
-/* =================== STEP 3 =================== */
+/* ===== STEP 3 ===== */
 function validateBZ(){ const ok = bz.value.trim().length>0; bzErr.style.display = ok?'none':'block'; return ok; }
 bz.addEventListener('input', validateBZ);
 
@@ -411,7 +408,7 @@ btnSubmit.onclick = ()=>{
   feedback.style.display='flex';
 };
 
-/* FEEDBACK (right-aligned, equal widths) */
+/* FEEDBACK (right-aligned) */
 fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
 fbOK.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok', feedback: fb.value}); };
 </script>
