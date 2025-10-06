@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>5Request Actual Access — Task Module</title>
+<title>Request 2Actual Access — Task Module</title>
 <style>
   :root{
     --brand:#0e5a73;           /* teal */
@@ -14,7 +14,7 @@
     --card:#ffffff;
     --danger:#b91c1c;
     --ok:#065f46;
-    --row-h:32px;              /* compact rows */
+    --row-h:32px;
     --radius:10px;
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
@@ -26,11 +26,7 @@
   .bar-right{display:flex;align-items:center;gap:12px}
   .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
   .btn:disabled{opacity:.5;cursor:not-allowed}
-  .btn.secondary{background:#e5eef2;color:var(--brand);font-weight:700}
-  .btn.ghost{background:#ffffff;border:1px solid #cbd5e1;color:var(--fg)}
-  .btn.flat{background:transparent;color:var(--brand);padding:6px 10px}
   .btn:hover{background:var(--brand-dark)}
-  .btn.flat:hover{background:transparent}
   .row{display:flex;gap:16px;align-items:center;margin:6px 0}
   .row > *{flex:1}
   label{font-weight:700}
@@ -44,7 +40,7 @@
   .help{font-size:12px; margin-top:6px; color:var(--muted)}
   .help.error{color:var(--danger)}
   .ok{color:var(--ok);font-weight:700}
-  .err{color:var(--danger)} /* red (not bold) */
+  .err{color:var(--danger)}
   .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
   .list th, .list td{padding:6px 10px; border-bottom:1px solid #eef2f7}
   .list tr{height:var(--row-h)}
@@ -53,6 +49,7 @@
   .x{font-weight:900;cursor:pointer}
   .section-title{margin:10px 0 6px;font-size:18px;border-top:3px solid #5b9bd5;padding-top:10px}
   .space{height:6px}
+  .hide{display:none}
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px}
   .modal .panel{background:#fff;width:min(680px,96vw);border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2)}
@@ -66,7 +63,7 @@
 <div class="shell">
   <div class="bar">
     <div class="center-actions">
-      <!-- FILLED TEAL buttons on the left -->
+      <!-- Back is hidden on Screen-1, shown on Screen-2/3 -->
       <button class="btn" id="btnBack">← Back</button>
       <button class="btn" id="btnClose">Close</button>
     </div>
@@ -76,7 +73,7 @@
     </div>
   </div>
 
-  <!-- ================== STEP 1: PRE-REQ (UNTOUCHED) ================== -->
+  <!-- ================== STEP 1: PRE-REQ (UNCHANGED) ================== -->
   <section class="card" id="step1">
     <div class="hdr"><h1>Pre-Requisites</h1></div>
     <div class="muted">Ensuring privacy … (static copy for POC)</div>
@@ -85,14 +82,14 @@
       <div style="flex:0 0 180px;"><label class="req">Agreement</label></div>
       <div><span id="agreementState" class="err">Agreement is not signed.</span></div>
       <div style="flex:0 0 200px;text-align:right">
-        <button class="btn secondary" id="markAgreement">Mark completed</button>
+        <button class="btn" id="markAgreement">Mark completed</button>
       </div>
     </div>
     <div class="row">
       <div style="flex:0 0 180px;"><label class="req">Training</label></div>
       <div><span id="trainingState" class="err">Training is not completed</span></div>
       <div style="flex:0 0 200px;text-align:right">
-        <button class="btn secondary" id="markTraining">Mark completed</button>
+        <button class="btn" id="markTraining">Mark completed</button>
       </div>
     </div>
   </section>
@@ -108,7 +105,7 @@
         <input type="text" id="searchBox" placeholder="Search" />
       </div>
       <div style="flex:0 0 120px;align-self:flex-end;text-align:right">
-        <button class="btn secondary" id="btnClear">Clear</button>
+        <button class="btn" id="btnClear">Clear</button>
       </div>
     </div>
 
@@ -178,7 +175,7 @@
     <div class="head">Confirm selection</div>
     <div class="body"><div id="confirmText"></div></div>
     <div class="foot">
-      <button class="btn ghost" id="cCancel">Cancel</button>
+      <button class="btn" id="cCancel">Cancel</button>
       <button class="btn" id="cOK">Confirm</button>
     </div>
   </div>
@@ -193,7 +190,7 @@
       <textarea id="fb" style="min-height:110px"></textarea>
     </div>
     <div class="foot">
-      <button class="btn ghost" id="fbCancel">Cancel</button>
+      <button class="btn" id="fbCancel">Cancel</button>
       <button class="btn" id="fbOK">OK</button>
     </div>
   </div>
@@ -202,15 +199,15 @@
 <script>
 /* =================== STATIC DATA (POC) =================== */
 const allUsers = [
-  { alias:"akanoo", name:"User Display" }, { alias:"alexr", name:"User Display" },
-  { alias:"chenl",  name:"User Display" }, { alias:"dev_1", name:"User Display" },
-  { alias:"isham",  name:"User Display" }, { alias:"jdoe",  name:"User Display" },
-  { alias:"katew",  name:"User Display" }, { alias:"liamj", name:"User Display" },
-  { alias:"mshah",  name:"User Display" }, { alias:"ninad", name:"User Display" },
-  { alias:"olgap",  name:"User Display" }, { alias:"omarh", name:"User Display" },
-  { alias:"pk",     name:"User Display" }, { alias:"ravin", name:"User Display" },
-  { alias:"sarab",  name:"User Display" }, { alias:"timq",  name:"User Display" },
-  { alias:"vikz",   name:"User Display" }, { alias:"zedx",  name:"User Display" }
+  { alias:"akanoo", displayName:"User Display" }, { alias:"alexr", displayName:"User Display" },
+  { alias:"chenl",  displayName:"User Display" }, { alias:"dev_1", displayName:"User Display" },
+  { alias:"isham",  displayName:"User Display" }, { alias:"jdoe",  displayName:"User Display" },
+  { alias:"katew",  displayName:"User Display" }, { alias:"liamj", displayName:"User Display" },
+  { alias:"mshah",  displayName:"User Display" }, { alias:"ninad", displayName:"User Display" },
+  { alias:"olgap",  displayName:"User Display" }, { alias:"omarh", displayName:"User Display" },
+  { alias:"pk",     displayName:"User Display" }, { alias:"ravin", displayName:"User Display" },
+  { alias:"sarab",  displayName:"User Display" }, { alias:"timq",  displayName:"User Display" },
+  { alias:"vikz",   displayName:"User Display" }, { alias:"zedx",  displayName:"User Display" }
 ].sort((a,b)=>a.alias.localeCompare(b.alias));
 
 /* =================== DOM HOOKS =================== */
@@ -256,6 +253,8 @@ function show(step){
   step2.style.display = step===2?'block':'none';
   step3.style.display = step===3?'block':'none';
   current = step;
+  // Back hidden on Screen-1
+  btnBack.classList.toggle('hide', current===1);
   refreshTopNext();
 }
 btnBack.onclick = ()=> show(1);
@@ -288,7 +287,7 @@ markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
 markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
 
-/* =================== IST HELPERS & FY WINDOWS (STRING-BASED) =================== */
+/* =================== IST + FY HELPERS (STRING-SAFE) =================== */
 /* Get today's date in IST as 'YYYY-MM-DD' (safe for <input type="date">) */
 function todayISTYMD(){
   return new Intl.DateTimeFormat('en-CA',{
@@ -297,15 +296,13 @@ function todayISTYMD(){
   }).format(new Date());
 }
 /* Fiscal-year window (strings 'YYYY-MM-DD') based on IST "today" */
-function fyWindowStrings(todayStr){ // todayStr = 'YYYY-MM-DD'
+function fyWindowStrings(todayStr){
   const [Y,M,D] = todayStr.split('-').map(Number);
   const inSecondHalf = (M>7) || (M===7 && D>=25); // on/after Jul 25
   const y = Y;
-  if(inSecondHalf){
-    return { start: `${y}-07-25`, end: `${y+1}-06-26` };
-  }else{
-    return { start: `${y-1}-07-25`, end: `${y}-06-26` };
-  }
+  return inSecondHalf
+    ? { start: `${y}-07-25`, end: `${y+1}-06-26` }
+    : { start: `${y-1}-07-25`, end: `${y}-06-26` };
 }
 
 /* =================== SCREEN 2 =================== */
@@ -313,7 +310,7 @@ let selected = new Set();
 
 function validateDuration(){
   const chosen = dt.value;                  // 'YYYY-MM-DD'
-  const today  = todayISTYMD();             // IST today as 'YYYY-MM-DD'
+  const today  = todayISTYMD();             // IST today
   const {start,end} = fyWindowStrings(today);
 
   let ok = false;
@@ -331,20 +328,21 @@ function validateDuration(){
 /* Set default date = IST today (e.g., 2025-10-06) */
 (function presetDateToToday(){
   dt.value = todayISTYMD();
-  validateDuration();     // help will show grey/red appropriately
+  validateDuration();     // help shows grey/red appropriately
 })();
 
 dt.addEventListener('change', validateDuration);
 
-/* Users list + chips */
+/* Users list + chips (Display name column) */
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
   allUsers.forEach(u=>{
-    if(q && !(u.alias.toLowerCase().includes(q) || u.name.toLowerCase().includes(q))) return;
+    const dispName = u.displayName || u.name || '';
+    if(q && !(u.alias.toLowerCase().includes(q) || dispName.toLowerCase().includes(q))) return;
     const tr = document.createElement('tr');
     const td1 = document.createElement('td'); td1.textContent = u.alias;
-    const td2 = document.createElement('td'); td2.textContent = u.name;
+    const td2 = document.createElement('td'); td2.textContent = dispName;
     const td3 = document.createElement('td'); td3.style.textAlign='right';
     const b = document.createElement('button');
     b.className='btn'; b.textContent = selected.has(u.alias)?'Added':'Add';
@@ -399,14 +397,56 @@ btnTopNext.onclick = ()=>{
 cCancel.onclick = ()=> confirm.style.display='none';
 cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
 
-/* STEP 3 */
+/* =================== STEP 3: Title & BZ =================== */
 function validateBZ(){ const ok = bz.value.trim().length>0; bzErr.style.display = ok?'none':'block'; return ok; }
 bz.addEventListener('input', validateBZ);
-btnSubmit.onclick = ()=>{ if(!validateBZ()) return; feedback.style.display='flex'; };
+
+btnSubmit.onclick = ()=>{
+  if(!validateBZ()) return;
+
+  /* ----- PUSH: create request (Power Automate / API) -----
+     const payload = {
+       date: dt.value,
+       users: Array.from(selected),
+       newTitle: newTitle.value,
+       justification: bz.value.trim()
+     };
+     fetch('<<YOUR_API_URL>>', {
+       method:'POST',
+       headers:{'content-type':'application/json'},
+       body: JSON.stringify(payload)
+     })
+     .then(r => r.ok ? r.json() : Promise.reject(r))
+     .then(resp => notifyParentClose({result:'ok', summary: payload, server: resp}))
+     .catch(err => alert('Failed to submit request'));
+  --------------------------------------------------------- */
+
+  // POC: show compact feedback; on OK close TM.
+  feedback.style.display='flex';
+};
 
 /* FEEDBACK */
 fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
-fbOK.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok', feedback: fb.value}); };
+fbOK.onclick = ()=>{
+  /* ----- PUSH: store feedback (optional) -----
+     fetch('<<FEEDBACK_API>>',{
+       method:'POST',
+       headers:{'content-type':'application/json'},
+       body: JSON.stringify({ text: fb.value })
+     });
+  ------------------------------------------------*/
+  feedback.style.display='none';
+  notifyParentClose({result:'ok', feedback: fb.value});
+};
+
+/* ----- PULL: preload data if needed -----
+   Example:
+   fetch('<<RETRIEVE_USERS_FOR_LOGIN_USER>>')
+     .then(r=>r.json())
+     .then(list => {
+        // hydrate allUsers / preselect users, etc.
+     });
+------------------------------------------------- */
 </script>
 </body>
 </html>
