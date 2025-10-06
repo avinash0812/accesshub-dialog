@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Request Actual Access (POC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 0; padding: 20px; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr 140px; gap: 12px; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; }
+    input[type="text"], select {
+      width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;
+    }
+    button { padding: 10px 16px; border-radius: 8px; border: 1px solid #0b3a52; background:#156082; color:#fff; cursor:pointer; }
+    button.secondary { background:#fff; color:#156082; }
+    .pill { background:#eef6fb; border:1px solid #cfe6f5; padding:4px 8px; border-radius:999px; font-size:12px; }
+    .btns { display:flex; gap:8px; margin-top:16px; }
+    ul { list-style:none; margin:12px 0 0; padding:0; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Request Actual Access — Search</h1>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label>Login User</label>
+          <select id="loginUser"></select>
+        </div>
+        <div>
+          <label>Show</label>
+          <select id="count"></select>
+        </div>
+        <div>
+          <label>Search alias or name</label>
+          <input id="q" type="text" placeholder="e.g. akanoo or Ashish" />
+        </div>
+        <div style="display:flex;align-items:end">
+          <button id="searchBtn">Search</button>
+        </div>
+      </div>
+
+      <ul id="results"></ul>
+
+      <div class="btns">
+        <button class="secondary" id="closeBtn">Close</button>
+        <button id="submitBtn">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://res.cdn.office.net/teams-js/v2.12.0/js/MicrosoftTeams.min.js"></script>
+  <script>
+    let all = [];              // flat array: {loginuser, alias, name, userType?}
+    const selected = new Map();// alias -> record
+    let demoCountOptions = [5,10,20,50];
+    let defaultCount = 10;
+
+    function b64decode(s){
+      try { return JSON.parse(atob(s.replace(/-/g,'+').replace(/_/g,'/'))); }
+      catch { return null; }
+    }
+
+    function getPayloadFromHash(){
+      const m = location.hash.match(/data=([^&]+)/);
+      if(!m) return null;
+      return b64decode(m[1]);
+    }
+
+    function uniqueLoginUsers(list){
+      return Array.from(new Set(list.map(x => x.loginuser))).sort();
+    }
+
+    function renderSelects(payload){
+      const lu = document.getElementById('loginUser');
+      lu.innerHTML = '';
+      uniqueLoginUsers(all).forEach(u=>{
+        const opt = document.createElement('option');
+        opt.value = u; opt.textContent = u;
+        lu.appendChild(opt);
+      });
+      if (payload?.loggedInUser?.alias === 'akanoo') {
+        // optional: default to User1 for your demo
+        lu.value = 'User1';
+      }
+
+      const countSel = document.getElementById('count');
+      countSel.innerHTML = '';
+      (payload?.demoUserCountOptions || demoCountOptions).forEach(n=>{
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        countSel.appendChild(opt);
+      });
+      countSel.value = payload?.demoUserCount || defaultCount;
+    }
+
+    function filteredByLoginUser(loginuser){
+      return all.filter(x => x.loginuser === loginuser);
+    }
+
+    function searchWithin(list, q){
+      if(!q) return list;
+      const s = q.toLowerCase();
+      return list.filter(x =>
+        (x.alias||'').toLowerCase().includes(s) ||
+        (x.name||'').toLowerCase().includes(s)
+      );
+    }
+
+    function renderResults(list){
+      const ul = document.getElementById('results');
+      ul.innerHTML = '';
+      const count = +document.getElementById('count').value || 10;
+      list.slice(0, count).forEach(r=>{
+        const li = document.createElement('li');
+        li.className = 'row';
+        li.innerHTML = `
+          <div><strong>${r.name}</strong><div class="pill">${r.alias}</div></div>
+          <div>Owner: ${r.loginuser}${r.userType? ' • '+r.userType : ''}</div>
+          <div style="text-align:right">
+            <button data-a="${r.alias}">${selected.has(r.alias) ? 'Remove' : 'Add'}</button>
+          </div>`;
+        li.querySelector('button').onclick = (e)=>{
+          const a = e.target.getAttribute('data-a');
+          if(selected.has(a)) selected.delete(a); else selected.set(a, r);
+          renderResults(list);
+        };
+        ul.appendChild(li);
+      });
+    }
+
+    (async () => {
+      await microsoftTeams.app.initialize();
+      const payload = getPayloadFromHash();
+
+      // 1) Load demo data
+      all = (payload?.seedUsers || []).map(x => ({
+        loginuser: x.loginuser, alias: x.alias, name: x.name, userType: x.userType || 'Actual'
+      }));
+      defaultCount = payload?.demoUserCount || defaultCount;
+      demoCountOptions = payload?.demoUserCountOptions || demoCountOptions;
+
+      // 2) Render selectors
+      renderSelects(payload);
+
+      // 3) Wire up actions
+      const doSearch = ()=>{
+        const login = document.getElementById('loginUser').value;
+        const base = filteredByLoginUser(login);
+        const q = document.getElementById('q').value.trim();
+        const out = searchWithin(base, q);
+        renderResults(out);
+      };
+
+      document.getElementById('searchBtn').onclick = doSearch;
+      document.getElementById('count').onchange = doSearch;
+      document.getElementById('loginUser').onchange = doSearch;
+
+      document.getElementById('closeBtn').onclick = ()=>{
+        microsoftTeams.tasks.submitTask({ message: 'Closed' });
+      };
+
+      document.getElementById('submitBtn').onclick = ()=>{
+        const arr = Array.from(selected.values());
+        microsoftTeams.tasks.submitTask({ message: 'Selected users', selected: arr });
+      };
+
+      // initial render
+      doSearch();
+    })();
+  </script>
+</body>
+</html>
