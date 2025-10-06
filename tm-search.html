@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Request Actual Access — Task Module</title>
+<title>Request 2Actual Access — Task Module</title>
 <style>
+  /* ---- GLOBAL FIX FOR ALIGNMENT ---- */
+  *,*::before,*::after{ box-sizing:border-box; }
+
   :root{
     --brand:#0e5a73;           /* teal */
     --brand-dark:#0b495d;
@@ -17,6 +20,7 @@
     --row-h:28px;              /* tighter rows */
     --radius:10px;
     --btnw:96px;               /* consistent button width */
+    --gap:16px;
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
   .shell{max-width:1100px;margin:24px auto;padding:0 16px;}
@@ -28,13 +32,14 @@
   .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer;min-width:var(--btnw);text-align:center}
   .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn:hover{background:var(--brand-dark)}
-  .row{display:flex;gap:16px;align-items:center;margin:6px 0}
+  .row{display:flex;gap:var(--gap);align-items:center;margin:6px 0}
   .row > *{flex:1}
-  .grid-2{display:grid;grid-template-columns:1fr 420px;gap:16px;align-items:start}
+
+  /* form controls */
   label{font-weight:700}
   .req::after{content:" *"; color:var(--danger); font-weight:800}
   input[type="date"],input[type="text"],textarea,select{
-    width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
+    display:block; width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
   }
   input.invalid{border-color:var(--danger)}
   textarea{min-height:160px; resize:vertical}
@@ -43,21 +48,35 @@
   .help.error{color:var(--danger)}
   .ok{color:var(--ok);font-weight:700}
   .err{color:var(--danger)}
+
+  /* list/table */
   .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
   .list th, .list td{padding:4px 8px; border-bottom:1px solid #eef2f7}
   .list tr{height:var(--row-h)}
   .list th{background:#f1f5f9;text-align:left;font-size:14px}
+
   .pill{display:inline-flex;gap:8px;align-items:center;background:#eef6fb;border:1px solid #cfe3ee;color:#083344;padding:4px 10px;border-radius:999px;margin:4px 6px 0 0}
   .x{font-weight:900;cursor:pointer}
   .section-title{margin:10px 0 6px;font-size:18px;border-top:3px solid #5b9bd5;padding-top:10px}
   .space{height:6px}
   .hide{display:none}
 
+  /* Screen 3 layout */
+  .grid-2{
+    display:grid;
+    grid-template-columns: 1fr 420px; /* right column is the dropdown column */
+    gap:var(--gap);
+    align-items:start;
+  }
+  .span-2{ grid-column: 1 / 3; }     /* span both columns exactly */
+  .actions-right{ grid-column:1 / 3; text-align:right; }
+
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px}
   .modal .panel{background:#fff;width:min(680px,96vw);border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2)}
   .modal .head{padding:12px 16px;border-bottom:1px solid #eef2f7;font-weight:700}
   .modal .body{padding:16px}
+  .modal .body textarea{display:block;width:100%;max-width:100%}  /* keep inside panel width */
   .modal .foot{padding:14px 16px;border-top:1px solid #eef2f7;display:flex;gap:10px;justify-content:flex-end}
 </style>
 </head>
@@ -75,7 +94,7 @@
     </div>
   </div>
 
-  <!-- ========== STEP 1 (unchanged) ========== -->
+  <!-- ===== STEP 1 (unchanged) ===== -->
   <section class="card" id="step1">
     <div class="hdr"><h1>Pre-Requisites</h1></div>
     <div class="muted">Ensuring privacy … (static copy for POC)</div>
@@ -96,7 +115,7 @@
     </div>
   </section>
 
-  <!-- ========== STEP 2 (unchanged visuals from your last working) ========== -->
+  <!-- ===== STEP 2 (unchanged visuals) ===== -->
   <section class="card" id="step2" style="display:none">
     <div class="hdr"><h1>Access Details</h1></div>
 
@@ -134,12 +153,12 @@
     </table>
   </section>
 
-  <!-- ========== STEP 3 (fixed alignment) ========== -->
+  <!-- ===== STEP 3 (alignment fixed) ===== -->
   <section class="card" id="step3" style="display:none">
     <div class="hdr"><h1>Title & Business Justification</h1></div>
 
     <div class="grid-2">
-      <!-- Row 1 -->
+      <!-- Row 1: titles -->
       <div>
         <label>Current title</label>
         <div class="pill" title="from HR system">Soft-Architect-Service</div>
@@ -154,22 +173,22 @@
         </select>
       </div>
 
-      <!-- Row 2: textarea spans both columns so its RIGHT EDGE matches the dropdown -->
-      <div style="grid-column:1 / 3">
+      <!-- Row 2: textarea spans BOTH columns (right edge = dropdown right edge) -->
+      <div class="span-2">
         <label class="req">Business Justification</label>
         <textarea id="bz"></textarea>
         <div id="bzErr" class="err" style="display:none">Business justification is required.</div>
       </div>
 
-      <!-- Row 3: Submit on new row, right aligned -->
-      <div style="grid-column:1 / 3; text-align:right; margin-top:4px">
+      <!-- Row 3: submit on its own row, right aligned -->
+      <div class="actions-right">
         <button class="btn" id="btnSubmit">Submit</button>
       </div>
     </div>
   </section>
 </div>
 
-<!-- CONFIRMATION -->
+<!-- ===== CONFIRMATION ===== -->
 <div class="modal" id="confirm">
   <div class="panel">
     <div class="head">Confirm selection</div>
@@ -181,13 +200,13 @@
   </div>
 </div>
 
-<!-- FEEDBACK (textarea right-aligned with OK) -->
+<!-- ===== FEEDBACK (textarea aligns with OK) ===== -->
 <div class="modal" id="feedback">
   <div class="panel">
     <div class="head">Feedback</div>
     <div class="body">
       <div class="muted" style="margin-bottom:8px">Optional: share quick feedback about this flow.</div>
-      <textarea id="fb" style="min-height:110px;width:100%"></textarea>
+      <textarea id="fb" style="min-height:110px;"></textarea>
     </div>
     <div class="foot">
       <button class="btn" id="fbCancel">Cancel</button>
@@ -197,7 +216,7 @@
 </div>
 
 <script>
-/* ===== STATIC DATA (POC) ===== */
+/* =================== STATIC DATA (POC) =================== */
 const allUsers = [
   { alias:"akanoo", displayName:"A. Kanoo" },
   { alias:"alexr",  displayName:"Alex Ritchie" },
@@ -219,7 +238,7 @@ const allUsers = [
   { alias:"zedx",   displayName:"Zed Xu" }
 ].sort((a,b)=>a.alias.localeCompare(b.alias));
 
-/* ===== DOM ===== */
+/* =================== DOM HOOKS =================== */
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
@@ -255,7 +274,7 @@ const fb = document.getElementById('fb');
 const fbCancel = document.getElementById('fbCancel');
 const fbOK = document.getElementById('fbOK');
 
-/* ===== NAV ===== */
+/* =================== NAV & CLOSE =================== */
 let current = 1;
 function show(step){
   step1.style.display = step===1?'block':'none';
@@ -265,13 +284,13 @@ function show(step){
   btnBack.classList.toggle('hide', current===1); // hide on first screen
   refreshTopNext();
 }
-btnBack.onclick  = ()=> show(current>1 ? current-1 : 1); // from 3 -> 2
+btnBack.onclick = ()=> show(current>1 ? current-1 : 1); // from 3 -> 2
 btnClose.onclick = ()=> notifyParentClose();
 function notifyParentClose(payload){
   try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
 }
 
-/* ===== SCREEN 1 state ===== */
+/* =================== SCREEN 1 (UNCHANGED) =================== */
 let prAgreement = false;
 let prTraining  = false;
 function evalStep1(){
@@ -285,7 +304,7 @@ markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
 markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
 
-/* ===== IST + FY ===== */
+/* =================== IST + FY HELPERS =================== */
 function todayISTYMD(){
   return new Intl.DateTimeFormat('en-CA',{ timeZone:'Asia/Kolkata', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
 }
@@ -297,7 +316,7 @@ function fyWindowStrings(todayStr){
                       : { start:`${y-1}-07-25`, end:`${y}-06-26` };
 }
 
-/* ===== SCREEN 2 ===== */
+/* =================== SCREEN 2 =================== */
 let selected = new Set();
 
 function validateDuration(){
@@ -321,6 +340,8 @@ function refreshTopNext(){
   else if(current===2) btnTopNext.disabled = !step2Ready();
   else                 btnTopNext.disabled = true;
 }
+
+/* default date = IST today */
 (function presetDateToToday(){
   dt.value = todayISTYMD();
   validateDuration();
@@ -328,6 +349,7 @@ function refreshTopNext(){
 })();
 dt.addEventListener('change', ()=>{ validateDuration(); refreshTopNext(); });
 
+/* Users list + chips */
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
@@ -380,7 +402,7 @@ btnTopNext.onclick = ()=>{
 cCancel.onclick = ()=> confirm.style.display='none';
 cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
 
-/* ===== STEP 3 ===== */
+/* =================== STEP 3 =================== */
 function validateBZ(){ const ok = bz.value.trim().length>0; bzErr.style.display = ok?'none':'block'; return ok; }
 bz.addEventListener('input', validateBZ);
 
@@ -408,10 +430,9 @@ btnSubmit.onclick = ()=>{
   feedback.style.display='flex';
 };
 
-/* FEEDBACK (right-aligned) */
+/* FEEDBACK */
 fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
 fbOK.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok', feedback: fb.value}); };
 </script>
 </body>
 </html>
-
