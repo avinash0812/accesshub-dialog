@@ -6,59 +6,38 @@
 <title>Request Actual Access — Task Module</title>
 <style>
   :root{
-    --brand:#145d79;        /* buttons & header bars */
-    --brand-dark:#0e4a61;
-    --accent:#0c728f;       /* chips outline hover */
-    --text:#1b1f23;
-    --muted:#6b7280;
-    --bg:#f7fafc;
-    --danger:#c62828;
-    --ok:#1c7f4e;
-    --card:#ffffff;
-    --line:#e6e8ea;
-    --radius:10px;
-    --pad:16px;
+    --brand:#145d79; --brand-dark:#0e4a61; --text:#1b1f23; --muted:#6b7280;
+    --bg:#f7fafc; --card:#ffffff; --line:#e6e8ea; --danger:#c62828; --ok:#1c7f4e;
   }
-  html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 "Segoe UI",system-ui,Arial,sans-serif}
   .wrap{max-width:1040px;margin:24px auto;padding:0 18px}
   h1{font-size:22px;margin:0 0 10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px}
-  .row{display:grid;grid-template-columns:180px 1fr;gap:10px 14px;align-items:center;margin:10px 0}
-  .row.tight{margin:6px 0}
-  .row .lbl{font-weight:600}
-  .hint{font-size:12px;color:var(--muted);margin-top:2px}
+  .bar{height:4px;background:var(--brand);border-radius:3px;margin:8px 0 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .stack{display:grid;gap:14px}
+  .row{display:grid;grid-template-columns:180px 1fr;gap:10px 14px;align-items:center;margin:4px 0}
+  .lbl{font-weight:600}
+  .hint{font-size:12px;color:var(--muted)}
   .star{color:var(--danger);margin-left:4px}
   input[type="text"],select,textarea,input[type="date"]{
-    width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
-    outline:none;background:#fff;transition:border .2s
+    width:100%;max-width:520px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;outline:none
   }
+  input[type="date"]{max-width:260px} /* keep inside card */
   input:focus,select:focus,textarea:focus{border-color:var(--brand)}
   textarea{min-height:86px;resize:vertical}
-  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .btn{
-    -webkit-appearance:none;appearance:none;border:0;border-radius:10px;
-    padding:10px 18px;font-weight:600;color:#fff;background:var(--brand);cursor:pointer
-  }
+  .btn{appearance:none;border:0;border-radius:10px;padding:10px 18px;font-weight:600;color:#fff;background:var(--brand);cursor:pointer}
   .btn:hover{background:var(--brand-dark)}
   .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
   .btn[disabled]{opacity:.55;cursor:not-allowed}
-  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
-  .bar{height:4px;background:var(--brand);border-radius:3px;margin:8px 0 10px}
-  /* small spacing globally to reduce scroll */
-  .stack{display:grid;gap:14px}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+  .pill{display:inline-block;border-radius:999px;background:#ecf5f8;color:#074254;padding:6px 10px;font-weight:600}
   .table{border:1px solid var(--line);border-radius:10px;overflow:hidden}
   table{width:100%;border-collapse:collapse;background:#fff}
   th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
   th{background:#f1f5f9;font-weight:600}
   tr:last-child td{border-bottom:0}
-  .chip{
-    border:1px solid var(--line);border-radius:999px;padding:6px 10px;display:inline-flex;gap:8px;
-    align-items:center;margin:4px 6px 0 0;background:#fff
-  }
-  .chip .x{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;
-    border:1px solid var(--line);cursor:pointer}
-  .inline{display:flex;gap:10px;align-items:center}
-  .pill{display:inline-block;border-radius:999px;background:#ecf5f8;color:#074254;padding:6px 10px;font-weight:600}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:6px 10px;display:inline-flex;gap:8px;align-items:center;margin:4px 6px 0 0;background:#fff}
+  .chip .x{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);cursor:pointer}
   .warn{color:var(--danger);font-size:12px;margin-top:4px}
   .ok{color:var(--ok);font-size:12px;margin-top:4px}
   /* modal */
@@ -69,453 +48,287 @@
   .sheet .bd{padding:16px}
   .sheet .ft{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
   .btn.w{min-width:110px;text-align:center}
-  /* compact details page (Title/Justification) */
   .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .right-col{display:grid;align-content:start;gap:8px}
-  .tight-pad{padding:12px 14px}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Request Actual Access — Search</h1>
-    <div class="bar"></div>
+<div class="wrap">
+  <h1>Request Actual Access</h1>
+  <div class="bar"></div>
 
-    <!-- Search / Select Section -->
-    <section id="sec-search" class="card stack tight-pad">
-      <div class="row tight">
-        <div class="lbl">Login user</div>
-        <div class="inline">
-          <select id="ddLogin"></select>
-          <div class="hint">Pick a demo user. <b>All</b> shows everyone.</div>
+  <!-- Screen 0: PRE-REQUISITES -->
+  <section id="sec-prereq" class="card stack">
+    <div class="row"><div class="lbl">Pre-Requisites</div><div class="hint">You must complete both items before continuing.</div></div>
+
+    <div class="row">
+      <div class="lbl">Agreement <span class="star">*</span></div>
+      <div>
+        <span id="agState" class="pill">Pending</span>
+        <div class="actions" style="justify-content:flex-start;gap:8px;margin-top:6px">
+          <button class="btn" id="agOpen">Open</button>
+          <button class="btn ghost" id="agDone">Mark completed</button>
         </div>
-      </div>
-
-      <div class="row tight">
-        <div class="lbl">Show</div>
-        <div class="inline">
-          <select id="ddTop">
-            <option value="10">Top 10</option>
-            <option value="20" selected>Top 20</option>
-            <option value="50">Top 50</option>
-            <option value="-1">All</option>
-          </select>
-          <div class="hint">Limits the number of rows returned.</div>
-        </div>
-      </div>
-
-      <div class="row tight">
-        <div class="lbl">Search alias or name</div>
-        <div class="inline" style="width:100%">
-          <input id="txtQ" type="text" placeholder="Type alias or display name…" />
-          <button class="btn" id="btnSearch">Search</button>
-          <button class="btn ghost" id="btnClear">Clear</button>
-        </div>
-      </div>
-
-      <!-- Selected aliases -->
-      <div class="row tight">
-        <div class="lbl">Selected users <span class="star">*</span></div>
-        <div id="selChips"></div>
-      </div>
-
-      <!-- Duration (immediate validation) -->
-      <div class="row tight">
-        <div class="lbl">Enter duration <span class="star">*</span></div>
-        <div>
-          <input id="dtDuration" type="date" />
-          <div id="dtHint" class="hint">Must be after today and not later than current fiscal year end.</div>
-          <div id="dtError" class="warn" style="display:none"></div>
-        </div>
-      </div>
-
-      <!-- Results -->
-      <div class="table" id="resultsBox" style="display:none">
-        <table id="tbl">
-          <thead>
-            <tr>
-              <th style="width:30%">Alias</th>
-              <th>Display name</th>
-              <th style="width:110px"></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="actions">
-        <button class="btn ghost" id="btnClose1">Close</button>
-        <button class="btn" id="btnNext" disabled>Next</button>
-      </div>
-    </section>
-
-    <!-- Title / Justification Section -->
-    <section id="sec-title" class="card stack tight-pad" style="display:none">
-      <div class="row tight">
-        <div class="lbl">Title</div>
-        <div class="bar" style="height:3px;margin:0"></div>
-      </div>
-
-      <div class="two">
-        <div>
-          <div class="row tight">
-            <div class="lbl">Current title</div>
-            <div id="curTitle" class="pill">Soft-Architect-Service</div>
-          </div>
-        </div>
-
-        <div class="right-col">
-          <div class="lbl">Your new title</div>
-          <select id="ddTitles">
-            <option>Architect</option>
-            <option>Senior Engineer</option>
-            <option>Manager</option>
-            <option>Director</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="lbl">Business justification <span class="star">*</span></div>
-        <div><textarea id="txtJust"></textarea></div>
-      </div>
-
-      <div class="actions">
-        <button class="btn ghost" id="btnBack1">Back</button>
-        <button class="btn" id="btnSubmitTitle">Submit</button>
-      </div>
-    </section>
-  </div>
-
-  <!-- Confirmation Modal -->
-  <div class="modal" id="mConfirm">
-    <div class="sheet">
-      <div class="hd">Confirm selection</div>
-      <div class="bd">
-        <div id="confirmTxt" class="stack"></div>
-      </div>
-      <div class="ft">
-        <button class="btn ghost w" id="mcCancel">Cancel</button>
-        <button class="btn w" id="mcOk">Confirm</button>
+        <!-- TODO (pull): Set initial Agreement status from your API/flow -->
       </div>
     </div>
-  </div>
 
-  <!-- Feedback Modal -->
-  <div class="modal" id="mFeedback">
-    <div class="sheet" style="width:min(520px,95vw)">
-      <div class="hd">Feedback</div>
-      <div class="bd">
-        <div class="hint" style="margin:0 0 6px">Optional: share quick feedback about this flow.</div>
-        <textarea id="txtFb" placeholder="Type a few lines…"></textarea>
-      </div>
-      <div class="ft">
-        <button class="btn ghost w" id="mfCancel">Cancel</button>
-        <button class="btn w" id="mfOk">OK</button>
+    <div class="row">
+      <div class="lbl">Training <span class="star">*</span></div>
+      <div>
+        <span id="trState" class="pill">Pending</span>
+        <div class="actions" style="justify-content:flex-start;gap:8px;margin-top:6px">
+          <button class="btn" id="trOpen">Open</button>
+          <button class="btn ghost" id="trDone">Mark completed</button>
+        </div>
+        <!-- TODO (pull): Set initial Training status from your API/flow -->
       </div>
     </div>
+
+    <div class="actions">
+      <button class="btn ghost" id="btnClose0">Close</button>
+      <button class="btn" id="btnNext0" disabled>Next</button>
+    </div>
+  </section>
+
+  <!-- Screen 1: SEARCH / SELECT -->
+  <section id="sec-search" class="card stack" style="display:none">
+    <div class="row"><div class="lbl">Login user</div><div><select id="ddLogin"></select> <span class="hint">Pick a demo user. <b>All</b> shows everyone.</span></div></div>
+    <div class="row"><div class="lbl">Show</div><div><select id="ddTop"><option value="10">Top 10</option><option value="20" selected>Top 20</option><option value="50">Top 50</option><option value="-1">All</option></select></div></div>
+    <div class="row">
+      <div class="lbl">Search alias or name</div>
+      <div class="actions" style="justify-content:flex-start">
+        <input id="txtQ" type="text" placeholder="Type alias or display name…" />
+        <button class="btn" id="btnSearch">Search</button>
+        <button class="btn ghost" id="btnClear">Clear</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="lbl">Selected users <span class="star">*</span></div>
+      <div id="selChips"></div>
+    </div>
+    <div class="row">
+      <div class="lbl">Enter duration <span class="star">*</span></div>
+      <div>
+        <input id="dtDuration" type="date" />
+        <div id="dtHint" class="hint">After today and ≤ fiscal year end.</div>
+        <div id="dtError" class="warn" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="table" id="resultsBox" style="display:none">
+      <table id="tbl"><thead><tr><th style="width:30%">Alias</th><th>Display name</th><th style="width:110px"></th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" id="btnClose1">Close</button>
+      <button class="btn" id="btnNext" disabled>Next</button>
+    </div>
+  </section>
+
+  <!-- Screen 2: TITLE / JUSTIFICATION -->
+  <section id="sec-title" class="card stack" style="display:none">
+    <div class="row"><div class="lbl">Title</div><div class="bar" style="height:3px;margin:0"></div></div>
+    <div class="two">
+      <div class="row"><div class="lbl">Current title</div><div id="curTitle" class="pill">Soft-Architect-Service</div></div>
+      <div class="right-col">
+        <div class="lbl">Your new title</div>
+        <select id="ddTitles"><option>Architect</option><option>Senior Engineer</option><option>Manager</option><option>Director</option></select>
+      </div>
+    </div>
+    <div class="row"><div class="lbl">Business justification <span class="star">*</span></div><div><textarea id="txtJust"></textarea></div></div>
+    <div class="actions">
+      <button class="btn ghost" id="btnBack1">Back</button>
+      <button class="btn" id="btnSubmitTitle">Submit</button>
+    </div>
+  </section>
+</div>
+
+<!-- Confirm -->
+<div class="modal" id="mConfirm">
+  <div class="sheet">
+    <div class="hd">Confirm selection</div>
+    <div class="bd"><div id="confirmTxt"></div></div>
+    <div class="ft"><button class="btn ghost w" id="mcCancel">Cancel</button><button class="btn w" id="mcOk">Confirm</button></div>
   </div>
+</div>
+<!-- Feedback -->
+<div class="modal" id="mFeedback">
+  <div class="sheet" style="width:min(520px,95vw)">
+    <div class="hd">Feedback</div>
+    <div class="bd"><div class="hint" style="margin:0 0 6px">Optional: share quick feedback about this flow.</div><textarea id="txtFb" placeholder="Type a few lines…"></textarea></div>
+    <div class="ft"><button class="btn ghost w" id="mfCancel">Cancel</button><button class="btn w" id="mfOk">OK</button></div>
+  </div>
+</div>
 
 <script>
-/* -------------------------------
-   Demo data (clubbed User1 + User3 as requested)
----------------------------------*/
+/* ===== Demo data (User1 + User3 clubbed) ===== */
 const USERS = [
-  { loginuser:"User1", alias:"akanoo", name:"Ashish Kanoongo" },
-  { loginuser:"User1", alias:"jdoe",   name:"John Doe" },
-  { loginuser:"User1", alias:"mshah",  name:"Meera Shah" },
-  { loginuser:"User1", alias:"sgeorge",name:"Sam George" },
-  { loginuser:"User1", alias:"pk",     name:"Priya K" },
-  { loginuser:"User1", alias:"alexr",  name:"Alex R" },
-  { loginuser:"User1", alias:"chenl",  name:"Chen Li" },
-  /* User2 */
-  { loginuser:"User2", alias:"katew",  name:"Kate W" },
-  { loginuser:"User2", alias:"omarh",  name:"Omar H" },
-  { loginuser:"User2", alias:"sarab",  name:"Sara B" },
-  { loginuser:"User2", alias:"timq",   name:"Tim Q" },
-  { loginuser:"User2", alias:"ninad",  name:"Nina D" },
-  { loginuser:"User2", alias:"vikz",   name:"Vik Z" },
-  /* User3 (clubbed with User1 for demo) */
-  { loginuser:"User1", alias:"liamj",  name:"Liam J" },
-  { loginuser:"User1", alias:"isham",  name:"Isha M" },
-  { loginuser:"User1", alias:"ravin",  name:"Ravi N" },
-  { loginuser:"User1", alias:"olgap",  name:"Olga P" },
-  /* User4 */
-  { loginuser:"User4", alias:"zedx",   name:"Zed X" },
-  { loginuser:"User4", alias:"riak",   name:"Riak" },
-  { loginuser:"User4", alias:"dev_1",  name:"Dev One" },
-].sort((a,b)=>a.alias.localeCompare(b.alias)); // alias alphabetical
+  { loginuser:"User1", alias:"akanoo", name:"User Display" },
+  { loginuser:"User1", alias:"jdoe",   name:"User Display" },
+  { loginuser:"User1", alias:"mshah",  name:"User Display" },
+  { loginuser:"User1", alias:"sgeorge",name:"User Display" },
+  { loginuser:"User1", alias:"pk",     name:"User Display" },
+  { loginuser:"User1", alias:"alexr",  name:"User Display" },
+  { loginuser:"User1", alias:"chenl",  name:"User Display" },
+  { loginuser:"User1", alias:"liamj",  name:"User Display" },
+  { loginuser:"User1", alias:"isham",  name:"User Display" },
+  { loginuser:"User1", alias:"ravin",  name:"User Display" },
+  { loginuser:"User1", alias:"olgap",  name:"User Display" },
+  { loginuser:"User2", alias:"katew",  name:"User Display" },
+  { loginuser:"User2", alias:"omarh",  name:"User Display" },
+  { loginuser:"User2", alias:"sarab",  name:"User Display" },
+  { loginuser:"User2", alias:"timq",   name:"User Display" },
+  { loginuser:"User2", alias:"ninad",  name:"User Display" },
+  { loginuser:"User2", alias:"vikz",   name:"User Display" },
+  { loginuser:"User4", alias:"zedx",   name:"User Display" },
+  { loginuser:"User4", alias:"riak",   name:"User Display" },
+  { loginuser:"User4", alias:"dev_1",  name:"User Display" },
+].sort((a,b)=>a.alias.localeCompare(b.alias));
 
-/* -------------------------------
-   Elements
----------------------------------*/
-const ddLogin = document.getElementById('ddLogin');
-const ddTop   = document.getElementById('ddTop');
-const txtQ    = document.getElementById('txtQ');
-const btnSearch = document.getElementById('btnSearch');
-const btnClear  = document.getElementById('btnClear');
-const tblBody = document.querySelector('#tbl tbody');
-const resultsBox = document.getElementById('resultsBox');
-const chips = document.getElementById('selChips');
-const dt = document.getElementById('dtDuration');
-const dtErr = document.getElementById('dtError');
-const btnNext = document.getElementById('btnNext');
-const btnClose1 = document.getElementById('btnClose1');
-const secSearch = document.getElementById('sec-search');
-const secTitle = document.getElementById('sec-title');
-const btnBack1 = document.getElementById('btnBack1');
-const btnSubmitTitle = document.getElementById('btnSubmitTitle');
-const txtJust = document.getElementById('txtJust');
-const ddTitles = document.getElementById('ddTitles');
+/* ===== elements ===== */
+const sec0=document.getElementById('sec-prereq');
+const secSearch=document.getElementById('sec-search');
+const secTitle=document.getElementById('sec-title');
 
-const mConfirm = document.getElementById('mConfirm');
-const confirmTxt = document.getElementById('confirmTxt');
-const mcOk = document.getElementById('mcOk');
-const mcCancel = document.getElementById('mcCancel');
+const agState=document.getElementById('agState');
+const trState=document.getElementById('trState');
+const btnNext0=document.getElementById('btnNext0');
+document.getElementById('agOpen').onclick=()=>window.open('#','_blank');
+document.getElementById('trOpen').onclick=()=>window.open('#','_blank');
+document.getElementById('agDone').onclick=()=>{agState.textContent='Completed';agState.className='pill';checkPrereq();}
+document.getElementById('trDone').onclick=()=>{trState.textContent='Completed';trState.className='pill';checkPrereq();}
+document.getElementById('btnClose0').onclick=closeTask;
+document.getElementById('btnNext0').onclick=()=>{sec0.style.display='none';secSearch.style.display='block';};
 
-const mFeedback = document.getElementById('mFeedback');
-const mfOk = document.getElementById('mfOk');
-const mfCancel = document.getElementById('mfCancel');
-const txtFb = document.getElementById('txtFb');
-
-const selected = new Set();
-
-/* -------------------------------
-   Query params (prefill)
----------------------------------*/
-const url = new URL(location.href);
-const qpLogin = url.searchParams.get('loginuser') || 'All';
-const qpShow  = url.searchParams.get('show') || '20';
-const qpQ     = url.searchParams.get('q') || '';
-
-/* -------------------------------
-   Build Login dropdown
----------------------------------*/
-function uniqueLoginUsers(){
-  const s = new Set(USERS.map(u=>u.loginuser));
-  return ['All', ...Array.from(s)];
+/* In prod, set these from your API/Flow on load */
+// TODO (pull): fetch pre-req status -> set agState/trState text to 'Completed' or 'Pending'
+function checkPrereq(){
+  const ok = agState.textContent==='Completed' && trState.textContent==='Completed';
+  btnNext0.disabled=!ok;
 }
-function buildLogin(){
-  ddLogin.innerHTML = uniqueLoginUsers().map(u =>
-    `<option value="${u}">${u}</option>`).join('');
-  ddLogin.value = qpLogin;
-}
-buildLogin();
+checkPrereq();
 
-/* -------------------------------
-   Duration: set to today & validate immediately
----------------------------------*/
-function todayISO(){
-  const d = new Date();
-  d.setHours(0,0,0,0);
-  return d.toISOString().slice(0,10);
-}
-function fiscalEndISO(){
-  const now = new Date();
-  const fiscalYearStart = new Date(now.getMonth()>=6 ? now.getFullYear() : now.getFullYear()-1, 6, 25); // Jul 25
-  const fiscalEnd = new Date(fiscalYearStart.getFullYear()+1, 5, 26); // Jun 26 next year
-  return fiscalEnd.toISOString().slice(0,10);
-}
-dt.value = todayISO(); // Clear sets today; user must choose valid date after today
-dt.max = fiscalEndISO();
-dt.addEventListener('change', validateDuration);
+/* ===== search page ===== */
+const ddLogin=document.getElementById('ddLogin');
+const ddTop=document.getElementById('ddTop');
+const txtQ=document.getElementById('txtQ');
+const btnSearch=document.getElementById('btnSearch');
+const btnClear=document.getElementById('btnClear');
+const tblBody=document.querySelector('#tbl tbody');
+const resultsBox=document.getElementById('resultsBox');
+const chips=document.getElementById('selChips');
+const dt=document.getElementById('dtDuration');
+const dtErr=document.getElementById('dtError');
+const btnNext=document.getElementById('btnNext');
+document.getElementById('btnClose1').onclick=closeTask;
+
+/* populate login list */
+(function(){
+  const set=new Set(USERS.map(u=>u.loginuser));
+  ddLogin.innerHTML=['All',...set].map(u=>`<option>${u}</option>`).join('');
+})();
+
+const selected=new Set();
+
+/* date helpers & validation */
+function todayISO(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString().slice(0,10)}
+function fiscalEndISO(){const now=new Date();const start=new Date(now.getMonth()>=6?now.getFullYear():now.getFullYear()-1,6,25);const end=new Date(start.getFullYear()+1,5,26);return end.toISOString().slice(0,10)}
+dt.value=todayISO();dt.max=fiscalEndISO(); // clear sets today (invalid) by design
+dt.addEventListener('change',validateDuration);
 
 function validateDuration(){
-  const t = new Date(todayISO());
-  const v = new Date(dt.value);
-  const max = new Date(dt.max);
-  let ok = true, msg='';
-  if(!(dt.value)){
-    ok = false; msg='Please choose a date.';
-  }else if(v <= t){
-    ok = false; msg='Date must be after today.';
-  }else if(v > max){
-    ok = false; msg=`Date must be on or before fiscal year end (${dt.max}).`;
-  }
-  dtErr.style.display = ok ? 'none' : 'block';
-  dtErr.textContent = ok ? '' : msg;
-  updateNextState();
-  return ok;
+  const t=new Date(todayISO()), v=new Date(dt.value), max=new Date(dt.max);
+  let ok=true,msg='';
+  if(!dt.value){ok=false;msg='Please choose a date.'}
+  else if(v<=t){ok=false;msg='Date must be after today.'}
+  else if(v>max){ok=false;msg=`Date must be on or before ${dt.max}.`}
+  dtErr.style.display=ok?'none':'block'; dtErr.textContent=ok?'':msg;
+  updateNextState(); return ok;
 }
 
-/* -------------------------------
-   Search & table render
----------------------------------*/
-function currentPool(){
-  const login = ddLogin.value;
-  return login==='All' ? USERS : USERS.filter(u=>u.loginuser===login);
-}
+/* search */
+function pool(){return ddLogin.value==='All'?USERS:USERS.filter(u=>u.loginuser===ddLogin.value)}
 function runSearch(){
-  const q = txtQ.value.trim().toLowerCase();
-  let rows = currentPool().filter(u =>
-    !q || u.alias.toLowerCase().includes(q) || u.name.toLowerCase().includes(q));
-
-  const top = parseInt(ddTop.value,10);
-  if(top>0) rows = rows.slice(0, top);
-
-  renderTable(rows);
+  const q=txtQ.value.trim().toLowerCase();
+  let rows=pool().filter(u=>!q||u.alias.toLowerCase().includes(q)||u.name.toLowerCase().includes(q));
+  const top=parseInt(ddTop.value,10); if(top>0) rows=rows.slice(0,top);
+  renderTable(rows); updateNextState();
 }
 function renderTable(rows){
-  resultsBox.style.display = rows.length ? 'block' : 'none';
-  const s = new Set(selected);
-  tblBody.innerHTML = rows.map(u=>{
-    const dis = s.has(u.alias) ? 'disabled' : '';
-    const label = s.has(u.alias) ? 'Added' : 'Add';
-    return `<tr data-alias="${u.alias}">
+  resultsBox.style.display=rows.length?'block':'none';
+  const s=new Set(selected);
+  tblBody.innerHTML=rows.map(u=>`<tr>
       <td><code>${u.alias}</code></td>
       <td>${u.name}</td>
-      <td><button class="btn" data-add="${u.alias}" ${dis}>${label}</button></td>
-    </tr>`;
-  }).join('');
+      <td><button class="btn" data-add="${u.alias}" ${s.has(u.alias)?'disabled':''}>${s.has(u.alias)?'Added':'Add'}</button></td>
+    </tr>`).join('');
 }
 function rebuildChips(){
-  chips.innerHTML = '';
-  [...selected].sort().forEach(a=>{
-    const c = document.createElement('span');
-    c.className='chip';
-    c.innerHTML = `<code>${a}</code><span class="x" data-x="${a}">×</span>`;
-    chips.appendChild(c);
-  });
-  // disable buttons for selected
-  document.querySelectorAll('[data-add]').forEach(b=>{
-    const a = b.getAttribute('data-add');
-    const s = selected.has(a);
-    b.disabled = s;
-    b.textContent = s ? 'Added' : 'Add';
-  });
+  chips.innerHTML=[...selected].sort().map(a=>`<span class="chip"><code>${a}</code><span class="x" data-x="${a}">×</span></span>`).join('');
+  document.querySelectorAll('[data-add]').forEach(b=>{const a=b.getAttribute('data-add');const s=selected.has(a);b.disabled=s;b.textContent=s?'Added':'Add'});
   updateNextState();
 }
-function updateNextState(){
-  const enable = selected.size>0 && validateDuration();
-  btnNext.disabled = !enable;
-}
+function updateNextState(){ btnNext.disabled = !(selected.size>0 && !dtErr.textContent && dt.value) }
 
-/* -------------------------------
-   Events
----------------------------------*/
-ddTop.value = qpShow;
-txtQ.value = qpQ;
+btnSearch.onclick=runSearch;
+ddLogin.onchange=runSearch;
+ddTop.onchange=runSearch;
+txtQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runSearch()}});
 
-btnSearch.addEventListener('click', runSearch);
-ddLogin.addEventListener('change', runSearch);
-ddTop.addEventListener('change', runSearch);
-txtQ.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); runSearch(); }});
+btnClear.onclick=()=>{ txtQ.value=''; dt.value=todayISO(); validateDuration(); runSearch(); };
 
-document.addEventListener('click', e=>{
-  const a = e.target.getAttribute?.('data-add');
-  if(a){
-    selected.add(a);
-    rebuildChips();
-  }
-  const x = e.target.getAttribute?.('data-x');
-  if(x){
-    selected.delete(x);
-    rebuildChips();
-  }
+document.addEventListener('click',e=>{
+  const a=e.target.getAttribute?.('data-add'); if(a){selected.add(a); rebuildChips(); return;}
+  const x=e.target.getAttribute?.('data-x'); if(x){selected.delete(x); rebuildChips(); return;}
 });
 
-btnClear.addEventListener('click', ()=>{
-  txtQ.value = '';
-  dt.value = todayISO();   // reset to today (will show validation)
-  validateDuration();
-  runSearch();
-});
-
-btnClose1.addEventListener('click', closeTask);
-
-/* -------------------------------
-   Next -> Confirmation modal
----------------------------------*/
-btnNext.addEventListener('click', ()=>{
-  if(!validateDuration() || selected.size===0) return;
-
-  const when = dt.value.split('-').reverse().join('/'); // dd/mm/yyyy for display
-  confirmTxt.innerHTML = `
-    <div>Following users are selected for <b>${when}</b>:</div>
-    <div style="margin-top:6px">${[...selected].sort().map(a=>`<div>• <code>${a}</code></div>`).join('')}</div>
-  `;
+/* Next -> confirm */
+const mConfirm=document.getElementById('mConfirm');
+const confirmTxt=document.getElementById('confirmTxt');
+document.getElementById('mcCancel').onclick=()=>mConfirm.classList.remove('show');
+document.getElementById('mcOk').onclick=()=>{mConfirm.classList.remove('show'); secSearch.style.display='none'; secTitle.style.display='block';
+  // TODO (pull): hydrate current title / dropdowns from backend with selected aliases + date
+};
+btnNext.onclick=()=>{
+  if(!validateDuration()||selected.size===0) return;
+  const when=dt.value.split('-').reverse().join('/');
+  confirmTxt.innerHTML=`<div>Following users are selected for <b>${when}</b>:</div><div style="margin-top:6px">${[...selected].sort().map(a=>`<div>• <code>${a}</code></div>`).join('')}</div>`;
   mConfirm.classList.add('show');
-});
+};
 
-mcCancel.addEventListener('click', ()=> mConfirm.classList.remove('show'));
-
-mcOk.addEventListener('click', ()=>{
-  mConfirm.classList.remove('show');
-
-  // Move to Title/Justification step (Screen 2 in your flow)
-  secSearch.style.display='none';
-  secTitle.style.display='block';
-
-  // TODO (pull): If you need to prefill "Current title" or "New title" options,
-  // call your Power Automate / API here using the selected aliases & date:
-  // fetch('<your_api>', { method:'POST', body: JSON.stringify({ aliases:[...selected], duration: dt.value }) })
-  //  .then(r=>r.json()).then(data => {/* set curTitle / ddTitles */});
-});
-
-/* -------------------------------
-   Title/Justification
----------------------------------*/
-btnBack1.addEventListener('click', ()=>{
-  secTitle.style.display='none';
-  secSearch.style.display='block';
-});
-
-btnSubmitTitle.addEventListener('click', ()=>{
-  const just = txtJust.value.trim();
-  if(!just){
-    alert('Business justification is required.');
-    return;
-  }
-  // Optional feedback modal
+/* Title/Justification submit + feedback */
+document.getElementById('btnBack1').onclick=()=>{secTitle.style.display='none';secSearch.style.display='block'};
+const mFeedback=document.getElementById('mFeedback');
+document.getElementById('btnSubmitTitle').onclick=()=>{
+  const just=document.getElementById('txtJust').value.trim();
+  if(!just){alert('Business justification is required.');return;}
   mFeedback.classList.add('show');
-});
-
-mfCancel.addEventListener('click', ()=> mFeedback.classList.remove('show'));
-
-mfOk.addEventListener('click', ()=>{
+};
+document.getElementById('mfCancel').onclick=()=>mFeedback.classList.remove('show');
+document.getElementById('mfOk').onclick=()=>{
   mFeedback.classList.remove('show');
-
-  // Build payload to return to Copilot/Teams (or parent web)
-  const payload = {
-    action: "request_actual_access",
-    loginuser: ddLogin.value,
-    aliases: [...selected].sort(),
-    duration: dt.value,
-    newTitle: ddTitles.value,
-    justification: txtJust.value.trim(),
-    feedback: txtFb.value.trim()
+  const payload={
+    action:"request_actual_access",
+    loginuser:ddLogin.value,
+    aliases:[...selected].sort(),
+    duration:dt.value,
+    newTitle:document.getElementById('ddTitles').value,
+    justification:document.getElementById('txtJust').value.trim(),
+    feedback:document.getElementById('txtFb').value.trim()
   };
+  // TODO (push): send payload to Power Automate / API to persist into Azure SQL
+  closeTask(payload);
+};
 
-  // TODO (push): send payload to Power Automate/API to persist into Azure SQL.
-  // fetch('<your_api>', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
-
-  closeTask(payload); // return & close task module
-});
-
-/* -------------------------------
-   Teams / Web close helper
----------------------------------*/
+/* close helper */
 function closeTask(payload={}){
-  // If running inside Teams task module
-  try{
-    if(window.microsoftTeams?.tasks?.submitTask){
-      window.microsoftTeams.tasks.submitTask(payload);
-      return;
-    }
-  }catch(e){}
-  // Fallback to parent window
-  try{
-    window.parent.postMessage({ type:'tm-close', payload }, '*');
-  }catch(e){}
-  // If standalone, just navigate away or show a small toast
-  // alert('Submitted. (Standalone preview)');
+  try{ if(window.microsoftTeams?.tasks?.submitTask){ window.microsoftTeams.tasks.submitTask(payload); return; } }catch(e){}
+  try{ window.parent.postMessage({type:'tm-close',payload},'*'); }catch(e){}
 }
 
-/* -------------------------------
-   Init
----------------------------------*/
-validateDuration();
-runSearch();
-rebuildChips();
+/* init */
+validateDuration(); runSearch();
 </script>
 </body>
 </html>
