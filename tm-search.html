@@ -1,440 +1,505 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Request Actual Access — Task Module2</title>
+<title>Request Actual Access — Task Module</title>
+
+<!-- Base styles (kept same look) -->
 <style>
   :root{
-    --brand:#0b5f7d;
-    --brand-700:#084e65;
+    --brand:#135a73;        /* same blue you’ve been using */
+    --brand-2:#0e485c;
+    --danger:#b91c1c;
     --muted:#6b7280;
-    --border:#d9dee5;
-    --danger:#cc1f1a;
-    --ok:#10b981;
-    --bg:#f8fafc;
+    --border:#d7dde2;
+    --bg:#f7f9fb;
+    --fg:#0f172a;
   }
-  html,body{margin:0;background:#fff;color:#111;font-family:Segoe UI, Roboto, Arial, sans-serif}
+  html,body{margin:0;padding:0;background:#fff;color:var(--fg);font:16px/1.3 "Segoe UI",Arial,Helvetica,sans-serif}
   .wrap{max-width:1080px;margin:18px auto;padding:0 16px}
-  .card{border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:#fff}
-  .hdr{display:flex;align-items:center;gap:8px;margin:0 0 10px 0;font-size:18px;font-weight:600}
-  .row{display:flex;gap:18px;align-items:center}
-  .row>.col{flex:1}
-  .mt-6{margin-top:6px}.mt-8{margin-top:8px}.mt-10{margin-top:10px}
-  .mb-6{margin-bottom:6px}
-  .thin{margin:8px 0;border:0;border-top:1px solid var(--border)}
-  label{font-weight:600}
-  .req::after{content:" *";color:#e11d48;font-weight:700}
+  h1{font-size:20px;margin:0 0 12px 0}
+  h2{font-size:18px;margin:0 0 10px 0}
+  .card{border:1px solid var(--border);border-radius:8px;padding:16px}
+  .row{display:flex;gap:18px;align-items:flex-start}
+  .col{flex:1 1 0}
+  .label{font-weight:600;margin:12px 0 6px}
+  .muted{color:var(--muted)}
+  .req::after{content:" *";color:var(--danger);font-weight:700}
   input[type="text"],input[type="date"],select,textarea{
-    width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff
+    width:100%;box-sizing:border-box;border:1px solid var(--border);
+    border-radius:6px;padding:10px 12px;background:#fff
   }
-  textarea{min-height:120px;resize:vertical}
-  .btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-weight:600;cursor:pointer}
-  .btn:hover{background:var(--brand-700)}
-  .btn.outline{background:transparent;color:var(--brand);border:1px solid var(--brand)}
-  .btn.ghost{background:#e7f3f7;color:#083a4a}
-  .btn[disabled]{opacity:.55;cursor:not-allowed}
-  .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:999px;padding:5px 10px;margin:3px 6px 0 0;font-size:13px;background:#f4f7fb}
-  .pill .x{cursor:pointer;color:#64748b}
-  .table{width:100%;border-collapse:collapse}
-  .table th,.table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
-  .table th{background:#f3f6fb;text-align:left;font-weight:700}
-  .error{color:#b91c1c;font-size:13px;margin-top:6px}
-  .hint{color:var(--muted);font-size:12px;margin-top:4px}
-  .badge-ok{color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:2px 8px;border-radius:999px;font-size:12px}
-  .badge-warn{color:#92400e;background:#fffbeb;border:1px solid #fde68a;padding:2px 8px;border-radius:999px;font-size:12px}
-  /* compact section spacing */
-  .section{margin:8px 0 12px}
-  .section h3{margin:0 0 8px 0;font-size:16px}
-  /* footer bar */
-  .footer{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
-  /* modal */
-  .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.38);z-index:50}
-  .modal.open{display:grid}
-  .modal .panel{width:min(560px,90vw);background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:0 10px 35px rgba(0,0,0,.25)}
-  .modal .phdr{padding:10px 14px;border-bottom:1px solid var(--border);font-weight:700}
-  .modal .pbd{padding:12px 14px}
-  .modal .pftr{padding:12px 14px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-  .btn.same{min-width:96px}
-  /* right-align the feedback box to match outer edge */
-  .pbd .feedback-box{width:100%}
-  /* compact lists */
-  .stack-compact>*{margin-top:6px}
+  textarea{min-height:120px}
+  .btn{
+    appearance:none;border:0;border-radius:9px;padding:10px 18px;cursor:pointer;
+    background:var(--brand);color:#fff;font-weight:600
+  }
+  .btn:hover{background:var(--brand-2)}
+  .btn.secondary{background:#e5eef2;color:#0b2c3a}
+  .btn.muted{background:#dfe7ec;color:#0b2c3a}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .toolbar .left{display:flex;gap:8px;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:20px;padding:6px 10px;margin:6px 8px 0 0}
+  .chip .x{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;background:#eee;cursor:pointer}
+
+  /* ---------- users table (tight rows, no layout change) ---------- */
+  table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  thead th{background:#f2f6f9;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+  tbody td{padding:6px 12px;line-height:1.2;border-bottom:1px solid var(--border)}   /* tightened */
+  tbody tr:last-child td{border-bottom:0}
+  tbody td .btn{margin:0}
+
+  /* errors/notes */
+  .error{color:var(--danger);font-size:13px;margin-top:6px;display:none}
+  .note{font-size:12px;color:#475569;margin-top:6px}
+
+  /* sections (screens) */
+  .section{display:none}
+  .section.active{display:block}
+
+  /* ---------- modals (centered) ---------- */
+  .modal{
+    position:fixed;inset:0;display:none;background:rgba(8,15,30,.45);
+    z-index:50;align-items:center;justify-content:center;padding:16px
+  }
+  .modal.open{display:flex}
+  .modal .modal-content{
+    background:#fff;border-radius:10px;max-width:640px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden
+  }
+  .modal-header{padding:14px 18px;border-bottom:1px solid var(--border)}
+  .modal-title{margin:0;font-size:18px}
+  .modal-body{padding:14px 18px}
+  .modal-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+  /* feedback textarea should never overflow frame */
+  #feedbackText{width:100% !important;box-sizing:border-box;height:130px;max-height:180px;resize:vertical}
+
+  .confirm-list{margin:8px 0 0 0;padding-left:18px}
+  .bar{height:1px;background:var(--border);margin:12px 0}
 </style>
 </head>
+
 <body>
 <div class="wrap">
-  <div class="card" id="screen1">
-    <div class="hdr">Request Actual Access — Pre-Requisites</div>
-    <hr class="thin" />
-    <div class="section stack-compact">
+  <h1>Request Actual Access — Search</h1>
+
+  <!-- Screen 1: Pre-requisites -->
+  <section id="screen1" class="section active">
+    <div class="card">
+      <div class="toolbar">
+        <div class="left">
+          <button id="s1Back" class="btn secondary">← Back</button>
+        </div>
+      </div>
+
+      <h2>Pre-Requisites</h2>
+      <div class="note">Ensuring privacy … morning light slipped across.</div>
+
+      <div class="row" style="margin-top:16px">
+        <div class="col">
+          <div class="label req">Agreement</div>
+          <div id="agreeState" style="font-weight:700">Agreement signed.</div>
+        </div>
+        <div class="col">
+          <div class="label req">Training</div>
+          <div id="trainState" style="font-weight:700">Training Completed</div>
+        </div>
+      </div>
+
+      <div class="toolbar" style="margin-top:20px;justify-content:flex-end">
+        <button id="toScreen2" class="btn">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 2: Pick users + duration -->
+  <section id="screen2" class="section">
+    <div class="card">
+      <div class="toolbar">
+        <button id="s2Back" class="btn secondary">← Back</button>
+        <div class="muted">Access Details</div>
+      </div>
+
+      <!-- search row kept simple (no type-ahead) -->
       <div class="row">
         <div class="col">
-          <label>Agreement <span class="req"></span></label>
-          <div id="agrStatus"></div>
-          <div class="hint">If not completed, open the Agreement in a new tab, finish it, then return here.</div>
+          <div class="label">Enter <span class="req">user name</span> (preferred approach)</div>
+          <input id="searchBox" type="text" placeholder="Search (alias or display name)" />
         </div>
-        <div class="col">
-          <label>Training <span class="req"></span></label>
-          <div id="trnStatus"></div>
-          <div class="hint">If not completed, launch the Training module, then return.</div>
+        <div class="col" style="max-width:130px;align-self:end">
+          <button id="searchBtn" class="btn" style="width:100%">Search</button>
         </div>
       </div>
-    </div>
-    <div class="footer">
-      <button class="btn" id="btn1Next" disabled>Next</button>
-    </div>
-  </div>
 
-  <div class="card" id="screen2" style="display:none">
-    <div class="hdr">Access Details</div>
-    <hr class="thin" />
-    <div class="row">
-      <div class="col">
-        <label>Search alias or name</label>
-        <div class="row">
-          <input id="q" class="col" type="text" placeholder="e.g., jdoe or John" />
-          <button class="btn" id="btnSearch" style="min-width:96px">Search</button>
-          <button class="btn outline" id="btnClear" style="min-width:96px">Clear</button>
-        </div>
-        <div class="hint">Sorted A → Z. Click “Add” to select; selected users appear below.</div>
-      </div>
-      <div class="col">
-        <label class="req">Enter Duration</label>
-        <input id="dt" type="date" />
-        <div id="dateErr" class="error" style="display:none"></div>
-        <div class="hint">Must be after today and within the current fiscal year (Jul 25 → Jun 26).</div>
-      </div>
-    </div>
+      <div class="bar"></div>
 
-    <div class="section">
-      <table class="table" id="tbl">
-        <thead><tr><th style="width:36%">Alias</th><th>Display name</th><th style="width:90px"></th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="section">
-      <h3>Selected users</h3>
+      <!-- selected users (chips) -->
+      <div class="label">Selected Username</div>
       <div id="chips"></div>
-    </div>
 
-    <div class="footer">
-      <button class="btn outline" id="btn2Back">Back</button>
-      <button class="btn" id="btn2Next" disabled>Next</button>
-    </div>
-  </div>
+      <div class="bar"></div>
 
-  <div class="card" id="screen3" style="display:none">
-    <div class="hdr">Title &amp; Business Justification</div>
-    <hr class="thin" />
-    <div class="row">
-      <div class="col">
-        <label>Current title</label>
-        <div id="curTitle" class="mt-6">Soft-Architect-Service</div>
+      <!-- duration -->
+      <div class="label req">Enter Duration</div>
+      <div class="row" style="align-items:center">
+        <div class="col" style="max-width:260px">
+          <input id="durationDate" type="date" />
+          <div id="durationError" class="error"></div>
+          <div class="note" id="fyNote">The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).</div>
+        </div>
+        <div class="col" style="max-width:120px">
+          <button id="clearBtn" class="btn muted" style="width:100%">Clear</button>
+        </div>
       </div>
-      <div class="col">
-        <label>Your new title</label>
-        <select id="newTitle">
-          <option>Architect</option>
-          <option>Principal Architect</option>
-          <option>Engineering Manager</option>
-          <option>Senior Engineer</option>
-          <option>Program Manager</option>
-        </select>
+
+      <div class="bar"></div>
+
+      <!-- simple table -->
+      <table class="users-table">
+        <thead>
+          <tr><th style="width:30%">Alias</th><th>Display name</th><th style="width:100px"></th></tr>
+        </thead>
+        <tbody id="usersTbody">
+          <!-- rows rendered by JS -->
+        </tbody>
+      </table>
+
+      <div class="toolbar" style="margin-top:14px;justify-content:flex-end">
+        <button id="nextBtn" class="btn">Next</button>
       </div>
     </div>
+  </section>
 
-    <div class="mt-10">
-      <label class="req">Business Justification</label>
+  <!-- Screen 3: Business Justification -->
+  <section id="screen3" class="section">
+    <div class="card">
+      <div class="toolbar">
+        <button id="s3Back" class="btn secondary">← Back</button>
+        <div class="muted">Title</div>
+      </div>
+
       <div class="row">
-        <div class="col"><textarea id="just"></textarea></div>
+        <div class="col">
+          <div class="label">Current title</div>
+          <div id="currentTitle">Soft-Architect-Service</div>
+        </div>
+        <div class="col">
+          <div class="label">Your new title</div>
+          <select id="newTitle">
+            <option>Architect</option>
+            <option>Senior Architect</option>
+            <option>Lead</option>
+            <option>Manager</option>
+          </select>
+        </div>
       </div>
-      <div id="justErr" class="error" style="display:none">Please enter a business justification.</div>
-    </div>
 
-    <div class="footer">
-      <button class="btn outline" id="btn3Back">Back</button>
-      <button class="btn" id="btn3Submit">Submit</button>
+      <div class="label req" style="margin-top:14px">Business Justification</div>
+      <textarea id="justText" placeholder="Enter Business Justification..."></textarea>
+      <div id="justError" class="error">Business Justification is required.</div>
+
+      <div class="toolbar" style="margin-top:14px;justify-content:flex-end">
+        <button id="submitBtn" class="btn">Submit</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Confirm selection modal -->
+<div id="confirmModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <div class="modal-header"><h3 class="modal-title">Confirm selection</h3></div>
+    <div class="modal-body">
+      <div id="confirmSummary"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="confirmCancelBtn" class="btn secondary">Cancel</button>
+      <button id="confirmOkBtn" class="btn">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- Feedback modal (centered, compact) -->
-<div class="modal" id="mdFeedback" role="dialog" aria-modal="true" aria-labelledby="mdHdr">
-  <div class="panel">
-    <div class="phdr" id="mdHdr">Feedback</div>
-    <div class="pbd">
-      <div class="hint" style="margin-bottom:6px">Optional: share quick feedback about this flow.</div>
-      <textarea id="fb" class="feedback-box" rows="4" placeholder="Type a few lines…"></textarea>
+<!-- Feedback modal -->
+<div id="fbModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <div class="modal-header"><h3 class="modal-title">Feedback</h3></div>
+    <div class="modal-body">
+      <div class="muted">Optional: share quick feedback about this flow.</div>
+      <textarea id="feedbackText" placeholder="Type a few lines…"></textarea>
     </div>
-    <div class="pftr">
-      <button class="btn outline same" id="fbCancel">Cancel</button>
-      <button class="btn same" id="fbOk">OK</button>
+    <div class="modal-footer">
+      <button id="fbCancel" class="btn secondary" style="width:100px">Cancel</button>
+      <button id="fbOk" class="btn" style="width:100px">OK</button>
     </div>
   </div>
 </div>
 
 <script>
-  /***********************
-   * STATIC DATA (POC only)
-   ***********************/
-  const PEOPLE = [
-    { loginuser:"User1", alias:"akanoo",  name:"User Display" },
-    { loginuser:"User1", alias:"jdoe",    name:"User Display" },
-    { loginuser:"User1", alias:"mshah",   name:"User Display" },
-    { loginuser:"User1", alias:"sgeorge", name:"User Display" },
-    { loginuser:"User1", alias:"pk",      name:"User Display" },
+/* ==========================================================
+   STATIC DATA for POC
+   ========================================================== */
+const USERS = [
+  { loginuser:"User1", alias:"akanoo", name:"User Display" },
+  { loginuser:"User1", alias:"alexr",  name:"User Display" },
+  { loginuser:"User1", alias:"chenl",  name:"User Display" },
+  { loginuser:"User1", alias:"dev_1",  name:"User Display" },
+  { loginuser:"User3", alias:"isham",  name:"User Display" },
+  { loginuser:"User1", alias:"jdoe",   name:"User Display" },
+  { loginuser:"User2", alias:"katew",  name:"User Display" },
+  { loginuser:"User3", alias:"liamj",  name:"User Display" },
+  { loginuser:"User1", alias:"mshah",  name:"User Display" },
+  { loginuser:"User2", alias:"ninad",  name:"User Display" },
+  { loginuser:"User2", alias:"olgap",  name:"User Display" },
+  { loginuser:"User2", alias:"omarh",  name:"User Display" },
+  { loginuser:"User1", alias:"pk",     name:"User Display" },
+  { loginuser:"User4", alias:"ravin",  name:"User Display" },
+  { loginuser:"User4", alias:"riak",   name:"User Display" },
+  { loginuser:"User4", alias:"dev_1",  name:"User Display" },
+  { loginuser:"User4", alias:"zedx",   name:"User Display" }
+];
+// show combined User1 + User3 as requested:
+const ALLOWED_LOGIN = new Set(["User1","User3","All"]);
+const CURRENT_LOGIN = "User1"; // for POC; in prod, inject logged-in user
 
-    { loginuser:"User2", alias:"katew",   name:"User Display" },
-    { loginuser:"User2", alias:"omarh",   name:"User Display" },
-    { loginuser:"User2", alias:"sarab",   name:"User Display" },
-    { loginuser:"User2", alias:"timq",    name:"User Display" },
-    { loginuser:"User2", alias:"ninad",   name:"User Display" },
+/* ==========================================================
+   DOM
+   ========================================================== */
+const screen1 = document.getElementById("screen1");
+const screen2 = document.getElementById("screen2");
+const screen3 = document.getElementById("screen3");
 
-    { loginuser:"User3", alias:"liamj",   name:"User Display" },
-    { loginuser:"User3", alias:"isham",   name:"User Display" },
-    { loginuser:"User3", alias:"ravin",   name:"User Display" },
-    { loginuser:"User3", alias:"olgap",   name:"User Display" },
-    { loginuser:"User3", alias:"alexr",   name:"User Display" },
+const toScreen2 = document.getElementById("toScreen2");
+const s1Back = document.getElementById("s1Back");    // kept
+const s2Back = document.getElementById("s2Back");
+const s3Back = document.getElementById("s3Back");
 
-    { loginuser:"User4", alias:"zedx",    name:"User Display" },
-    { loginuser:"User4", alias:"dev_1",   name:"User Display" },
-    { loginuser:"User4", alias:"chenl",   name:"User Display" }
-  ]
-  // For the POC, treat All users as the available set
-  const ALL = PEOPLE.slice().sort((a,b)=>a.alias.localeCompare(b.alias))
+const usersTbody = document.getElementById("usersTbody");
+const chips = document.getElementById("chips");
 
-  /*****************************************
-   * PRE-REQUISITES (Screen 1) – demo only
-   *****************************************/
-  // Demo: pretend we loaded agreement/training status for the logged-in user
-  // TODO (PULL): Call your flow/API to retrieve prerequisite flags for user
-  const prereq = { agreement:true, training:true }
+const durationInput = document.getElementById("durationDate");
+const durationErr   = document.getElementById("durationError");
+const nextBtn       = document.getElementById("nextBtn");
+const clearBtn      = document.getElementById("clearBtn");
 
-  const agrStatus = document.getElementById('agrStatus')
-  const trnStatus = document.getElementById('trnStatus')
-  const btn1Next = document.getElementById('btn1Next')
+const searchBox     = document.getElementById("searchBox");
+const searchBtn     = document.getElementById("searchBtn");
 
-  function renderPrereq(){
-    agrStatus.innerHTML = prereq.agreement
-      ? `<span class="badge-ok">Agreement signed</span>`
-      : `<span class="badge-warn">Pending — <a href="#" target="_blank">Open Agreement</a></span>`
+const justText  = document.getElementById("justText");
+const justError = document.getElementById("justError");
+const submitBtn = document.getElementById("submitBtn");
 
-    trnStatus.innerHTML = prereq.training
-      ? `<span class="badge-ok">Training completed</span>`
-      : `<span class="badge-warn">Pending — <a href="#" target="_blank">Start Training</a></span>`
+/* ==========================================================
+   Helpers (screens + modals)
+   ========================================================== */
+function show(el){ el.classList.add("active"); }
+function hide(el){ el.classList.remove("active"); }
 
-    btn1Next.disabled = !(prereq.agreement && prereq.training)
+const confirmModal = document.getElementById("confirmModal");
+const confirmSummary = document.getElementById("confirmSummary");
+const confirmOkBtn = document.getElementById("confirmOkBtn");
+const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+
+const fbModal = document.getElementById("fbModal");
+const fbOk = document.getElementById("fbOk");
+const fbCancel = document.getElementById("fbCancel");
+
+function openModal(el){ el.classList.add("open"); }
+function closeModal(el){ el.classList.remove("open"); }
+
+/* ==========================================================
+   State
+   ========================================================== */
+let selected = new Set();  // of aliases
+
+/* ==========================================================
+   Renderers
+   ========================================================== */
+function renderUsers(list){
+  list.sort((a,b)=>a.alias.localeCompare(b.alias));
+  const rows = list.map(u=>{
+    const disabled = selected.has(u.alias) ? "disabled" : "";
+    return `<tr class="user-row">
+      <td>${u.alias}</td>
+      <td>${u.name}</td>
+      <td><button class="btn addBtn" data-alias="${u.alias}" ${disabled}>Add</button></td>
+    </tr>`;
+  }).join("");
+  usersTbody.innerHTML = rows;
+
+  // wire add
+  usersTbody.querySelectorAll(".addBtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const a = btn.dataset.alias;
+      selected.add(a);
+      btn.disabled = true;              // hide/disable after add (requirement)
+      paintChips();
+    });
+  });
+}
+
+function paintChips(){
+  if(selected.size===0){ chips.innerHTML=""; return; }
+  const arr = Array.from(selected).sort((a,b)=>a.localeCompare(b));
+  chips.innerHTML = arr.map(a=>(
+    `<span class="chip">${a}<span class="x" data-alias="${a}" title="Remove">×</span></span>`
+  )).join("");
+
+  chips.querySelectorAll(".x").forEach(x=>{
+    x.addEventListener("click", ()=>{
+      const a = x.dataset.alias;
+      selected.delete(a);
+
+      // re-enable its “Add” button
+      const btn = usersTbody.querySelector(`.addBtn[data-alias="${a}"]`);
+      if(btn) btn.disabled = false;
+      paintChips();
+    });
+  });
+}
+
+/* ==========================================================
+   Load initial list (User1 + User3 for POC)
+   ========================================================== */
+function allowed(u){
+  return ALLOWED_LOGIN.has("All") || ALLOWED_LOGIN.has(u.loginuser);
+}
+renderUsers(USERS.filter(allowed));
+
+/* ==========================================================
+   Search (no type-ahead; click button → filter)
+   ========================================================== */
+searchBtn.addEventListener("click", ()=>{
+  const q = (searchBox.value||"").trim().toLowerCase();
+  const list = USERS.filter(u=>allowed(u) && (u.alias.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)));
+  renderUsers(list);
+});
+
+/* ==========================================================
+   Duration validation (uniform message)
+   ========================================================== */
+const FY_MSG = "The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).";
+
+function validateFiscalDate(iso){
+  if(!iso) return {ok:false,msg:FY_MSG};
+  const today = new Date();
+  const typed = new Date(iso+"T00:00:00");
+
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if(typed <= todayOnly) return {ok:false,msg:FY_MSG};
+
+  // Current FY window: Jul 25 – Jun 26
+  const fyStartYear = (today.getMonth()>6 || (today.getMonth()===6 && today.getDate()>=25))
+    ? today.getFullYear()
+    : today.getFullYear() - 1;
+  const fyStart = new Date(fyStartYear, 6, 25);
+  const fyEnd   = new Date(fyStartYear + 1, 5, 26);
+
+  if(typed < fyStart || typed > fyEnd) return {ok:false,msg:FY_MSG};
+  return {ok:true};
+}
+
+function refreshDateValidity(){
+  const res = validateFiscalDate(durationInput.value);
+  if(!res.ok){ durationErr.textContent=res.msg; durationErr.style.display="block"; nextBtn.disabled=true; }
+  else{ durationErr.textContent=""; durationErr.style.display="none"; nextBtn.disabled=false; }
+}
+
+// IST today used when clearing (as requested)
+function setTodayIST(){
+  const now = new Date();
+  // convert to IST date string yyyy-mm-dd
+  const utc = now.getTime() + (now.getTimezoneOffset()*60000);
+  const ist = new Date(utc + 5.5*3600000);
+  const y = ist.getFullYear();
+  const m = String(ist.getMonth()+1).padStart(2,"0");
+  const d = String(ist.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+durationInput.addEventListener("input", refreshDateValidity);
+durationInput.addEventListener("change", refreshDateValidity);
+
+// CLEAR → set to today's date (which intentionally disables Next until changed)
+clearBtn.addEventListener("click", ()=>{
+  durationInput.value = setTodayIST();
+  refreshDateValidity();
+});
+
+// initialize date to today (disabled Next)
+durationInput.value = setTodayIST();
+refreshDateValidity();
+
+/* ==========================================================
+   Navigation (screens)
+   ========================================================== */
+toScreen2.addEventListener("click", ()=>{
+  // In prod: gate with backend flags for agreement / training
+  hide(screen1); show(screen2);
+});
+s1Back.addEventListener("click", ()=>{ /* keep as no-op for now */ });
+s2Back.addEventListener("click", ()=>{ hide(screen2); show(screen1); });
+s3Back.addEventListener("click", ()=>{ hide(screen3); show(screen2); });
+
+/* ==========================================================
+   NEXT (Screen 2) → confirm dialog (centered)
+   ========================================================== */
+nextBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  const res = validateFiscalDate(durationInput.value);
+  if(!res.ok){ refreshDateValidity(); return; }
+  if(selected.size===0){ alert("Select at least one user."); return; }
+
+  const arr = Array.from(selected).sort((a,b)=>a.localeCompare(b));
+  confirmSummary.innerHTML =
+    `<div><strong>Duration:</strong> ${durationInput.value}</div>
+     <div style="margin-top:8px"><strong>Users:</strong></div>
+     <ul class="confirm-list">${arr.map(a=>`<li>${a}</li>`).join("")}</ul>`;
+  openModal(confirmModal);
+});
+confirmCancelBtn.addEventListener("click", ()=>closeModal(confirmModal));
+confirmOkBtn.addEventListener("click", ()=>{
+  closeModal(confirmModal);
+  hide(screen2); show(screen3);
+});
+
+/* ==========================================================
+   Submit (Screen 3) → validate inline, then feedback modal
+   ========================================================== */
+submitBtn.addEventListener("click", ()=>{
+  const txt = (justText.value||"").trim();
+  if(!txt){
+    justError.style.display="block"; justText.focus(); return;
   }
-  renderPrereq()
+  justError.style.display="none";
 
-  /*****************************************
-   * ACCESS (Screen 2)
-   *****************************************/
-  const q        = document.getElementById('q')
-  const tblBody  = document.querySelector('#tbl tbody')
-  const chips    = document.getElementById('chips')
-  const dt       = document.getElementById('dt')
-  const dateErr  = document.getElementById('dateErr')
-  const btn2Next = document.getElementById('btn2Next')
+  // In PROD: call Power Automate / API here to save final request
+  // ----------------------------------------------
+  // Example payload:
+  // const payload = {
+  //   loginUser: CURRENT_LOGIN,
+  //   duration: durationInput.value,
+  //   aliases: Array.from(selected),
+  //   newTitle: document.getElementById("newTitle").value,
+  //   businessJustification: txt
+  // };
+  // TODO: POST payload to Azure Function / Logic App
+  // ----------------------------------------------
 
-  let selected = new Set() // aliases
+  openModal(fbModal);
+});
+fbCancel.addEventListener("click", ()=>{ closeModal(fbModal); /* do nothing else */ });
+fbOk.addEventListener("click", ()=>{
+  // In PROD: send feedbackText.value to backend (optional)
+  closeModal(fbModal);
 
-  // Default date = today (IST). Clear will also set to today.
-  setDateToTodayIST()
-  validateDate()
-
-  function toIST(d){
-    // Convert device time → IST date (no time)
-    const tzOffset = 330 // minutes
-    const utc = new Date(d.getTime() + (d.getTimezoneOffset()*60000))
-    return new Date(utc.getTime() + tzOffset*60000)
-  }
-  function todayIST(){
-    const t = toIST(new Date())
-    return new Date(t.getFullYear(), t.getMonth(), t.getDate())
-  }
-  function formatYMD(d){ // yyyy-mm-dd
-    const m = String(d.getMonth()+1).padStart(2,'0')
-    const day = String(d.getDate()).padStart(2,'0')
-    return `${d.getFullYear()}-${m}-${day}`
-  }
-  function setDateToTodayIST(){
-    dt.value = formatYMD(todayIST())
-  }
-
-  // FY rule: valid range: Jul 25 → Jun 26 (of the *current* FY based on IST "today")
-  function fiscalRangeIST(){
-    const t = todayIST()
-    const y = t.getFullYear()
-    const startThisYear = new Date(y, 6, 25) // Jul is month 6 (0-based)
-    if (t >= startThisYear){
-      // Current FY from Jul 25 (current year) to Jun 26 (next year)
-      return { start: startThisYear, end: new Date(y+1, 5, 26) }
-    } else {
-      // We are before Jul 25 → FY started last year
-      return { start: new Date(y-1, 6, 25), end: new Date(y, 5, 26) }
-    }
-  }
-
-  function validateDate(){
-    const v = dt.value ? new Date(dt.value+"T00:00:00") : null
-    const t = todayIST()
-    const {start,end} = fiscalRangeIST()
-    let msg = ""
-    if(!v){ msg = "Please select a date."; }
-    else if (v <= t){ msg = "Date must be after today (IST)."; }
-    else if (v < start || v > end){
-      msg = "The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26)."
-    }
-    dateErr.style.display = msg ? 'block':'none'
-    dateErr.textContent = msg
-    gateNext()
-  }
-
-  dt.addEventListener('change', validateDate)
-
-  function gateNext(){
-    btn2Next.disabled = !(selected.size>0 && dateErr.style.display==='none')
-  }
-
-  function renderTable(list){
-    tblBody.innerHTML = ""
-    list.forEach(p=>{
-      const tr = document.createElement('tr')
-      tr.innerHTML = `
-        <td>${p.alias}</td>
-        <td>${p.name}</td>
-        <td style="text-align:right">
-          <button class="btn btn-add" data-alias="${p.alias}" ${selected.has(p.alias)?"disabled":""}>Add</button>
-        </td>`
-      tblBody.appendChild(tr)
-    })
-    tblBody.querySelectorAll('.btn-add').forEach(b=>{
-      b.addEventListener('click',()=>{
-        selected.add(b.dataset.alias)
-        renderChips()
-        renderTable(currentList) // disable its add
-        gateNext()
-      })
-    })
-  }
-
-  function renderChips(){
-    chips.innerHTML = ""
-    Array.from(selected).sort().forEach(a=>{
-      const el = document.createElement('span')
-      el.className = 'pill'
-      el.innerHTML = `${a}<span class="x" title="Remove">✕</span>`
-      el.querySelector('.x').addEventListener('click',()=>{
-        selected.delete(a)
-        renderChips()
-        renderTable(currentList) // re-enable its add
-        gateNext()
-      })
-      chips.appendChild(el)
-    })
-  }
-
-  let currentList = ALL.slice()
-  renderTable(currentList)
-
-  document.getElementById('btnSearch').addEventListener('click',()=>{
-    const t = q.value.trim().toLowerCase()
-    currentList = t
-      ? ALL.filter(p=>p.alias.toLowerCase().includes(t) || p.name.toLowerCase().includes(t))
-      : ALL.slice()
-    renderTable(currentList)
-  })
-  document.getElementById('btnClear').addEventListener('click',()=>{
-    q.value = ""
-    currentList = ALL.slice()
-    renderTable(currentList)
-    selected.clear()
-    renderChips()
-    setDateToTodayIST()      // per your request
-    validateDate()
-  })
-
-  /*****************************************
-   * TITLE / JUSTIFICATION (Screen 3)
-   *****************************************/
-  const just = document.getElementById('just')
-  const justErr = document.getElementById('justErr')
-
-  function validateJust(){
-    const ok = just.value.trim().length>0
-    justErr.style.display = ok ? 'none':'block'
-    return ok
-  }
-  just.addEventListener('input', validateJust)
-
-  /*****************************************
-   * NAVIGATION
-   *****************************************/
-  const s1 = document.getElementById('screen1')
-  const s2 = document.getElementById('screen2')
-  const s3 = document.getElementById('screen3')
-
-  btn1Next.addEventListener('click',()=>{ s1.style.display='none'; s2.style.display='block' })
-  document.getElementById('btn2Back').addEventListener('click',()=>{ s2.style.display='none'; s1.style.display='block' })
-  document.getElementById('btn2Next').addEventListener('click',()=>{ s2.style.display='none'; s3.style.display='block' })
-  document.getElementById('btn3Back').addEventListener('click',()=>{ s3.style.display='none'; s2.style.display='block' })
-
-  /*****************************************
-   * SUBMIT → FEEDBACK MODAL
-   *****************************************/
-  const md = document.getElementById('mdFeedback')
-  const fb = document.getElementById('fb')
-  document.getElementById('btn3Submit').addEventListener('click',()=>{
-    if(!validateJust()) return
-    // TODO (PUSH): send payload to Flow/API before opening feedback if desired
-    //   payload example:
-    //   {
-    //     duration: dt.value, users: [...selected], newTitle: newTitle.value,
-    //     justification: just.value
-    //   }
-    md.classList.add('open')
-    fb.value=""
-    fb.focus()
-  })
-  document.getElementById('fbCancel').addEventListener('click',()=> md.classList.remove('open'))
-  document.getElementById('fbOk').addEventListener('click',()=>{
-    // TODO (PUSH): send feedback text in `fb.value` to Flow/API
-    // Close Task Module (Teams) if available; fallback to close tab
-    try{
-      if (window.microsoftTeams && microsoftTeams.tasks){
-        microsoftTeams.tasks.submitTask({ ok:true })
-      }else{
-        window.close()
-      }
-    }catch{ window.close() }
-  })
-
-  /*****************************************
-   * INTEGRATION NOTES (Power Automate / API)
-   *****************************************/
-  /*
-   PULL (when screen loads):
-     - GET /user/{id}/prerequisites  → { agreement:boolean, training:boolean }
-     - GET /people?loginUser={id}    → list of people for the table (or use server-side search)
-
-   PUSH:
-     - POST /request/access
-       body: {
-         duration: "YYYY-MM-DD",
-         users: ["alias1","alias2",...],
-         newTitle: "Architect",
-         justification: "text..."
-       }
-     - POST /feedback
-       body: { text:"..." }
-
-   You can call Power Automate flows by exposing them as HTTP request triggers
-   or by having your web page call a light-weight API (Azure Functions) which
-   then invokes the Flow. Keep payloads small; keep the table server-paged for scale.
-  */
+  // Close task module (Teams) — for POC we simply reload/close
+  // if (microsoftTeams) microsoftTeams.tasks.submitTask({status:'ok'});
+  window.close(); // harmless if in browser tab
+});
 </script>
+
 </body>
 </html>
