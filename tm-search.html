@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>8Request Actual Access — Task Module</title>
+<title>Request 2Actual Access — Task Module</title>
 <style>
   :root{
     --brand:#0e5a73;           /* teal */
@@ -14,9 +14,9 @@
     --card:#ffffff;
     --danger:#b91c1c;
     --ok:#065f46;
-    --row-h:28px;              /* tighter rows (was 32) */
+    --row-h:28px;              /* tighter rows */
     --radius:10px;
-    --btnw:96px;               /* consistent button width */
+    --btnw:96px;               /* consistent button width everywhere */
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
   .shell{max-width:1100px;margin:24px auto;padding:0 16px;}
@@ -37,14 +37,14 @@
     width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
   }
   input.invalid{border-color:var(--danger)}
-  textarea{min-height:140px; resize:vertical}
+  textarea{min-height:160px; resize:vertical}
   .muted{color:var(--muted);font-size:12px}
   .help{font-size:12px; margin-top:6px; color:var(--muted)}
   .help.error{color:var(--danger)}
   .ok{color:var(--ok);font-weight:700}
   .err{color:var(--danger)}
   .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
-  .list th, .list td{padding:4px 8px; border-bottom:1px solid #eef2f7} /* tighter padding */
+  .list th, .list td{padding:4px 8px; border-bottom:1px solid #eef2f7}
   .list tr{height:var(--row-h)}
   .list th{background:#f1f5f9;text-align:left;font-size:14px}
   .pill{display:inline-flex;gap:8px;align-items:center;background:#eef6fb;border:1px solid #cfe3ee;color:#083344;padding:4px 10px;border-radius:999px;margin:4px 6px 0 0}
@@ -57,7 +57,7 @@
   .modal .panel{background:#fff;width:min(680px,96vw);border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2)}
   .modal .head{padding:12px 16px;border-bottom:1px solid #eef2f7;font-weight:700}
   .modal .body{padding:16px}
-  .modal .foot{padding:14px 16px;border-top:1px solid #eef2f7;display:flex;gap:10px;justify-content:flex-end} /* right aligned */
+  .modal .foot{padding:14px 16px;border-top:1px solid #eef2f7;display:flex;gap:10px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -119,7 +119,6 @@
       <div style="max-width:320px">
         <label class="req">Enter Duration</label>
         <input type="date" id="dt" />
-        <!-- single line help; grey when OK, red when invalid -->
         <div id="dtHelp" class="help">
           The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).
         </div>
@@ -138,8 +137,8 @@
   <section class="card" id="step3" style="display:none">
     <div class="hdr"><h1>Title & Business Justification</h1></div>
 
-    <!-- Row 1: current title (left) and new title (right) -->
-    <div class="grid-2" style="margin-bottom:8px">
+    <div class="grid-2">
+      <!-- Row 1: current/new titles -->
       <div>
         <label>Current title</label>
         <div class="pill" title="from HR system">Soft-Architect-Service</div>
@@ -154,15 +153,15 @@
         </select>
       </div>
 
-      <!-- Row 2: Business Justification spans left column only, right edge aligns with dropdown -->
-      <div>
+      <!-- Row 2: Business Justification spans BOTH columns and aligns to right edge of dropdown -->
+      <div style="grid-column:1 / 3">
         <label class="req">Business Justification</label>
         <textarea id="bz"></textarea>
         <div id="bzErr" class="err" style="display:none">Business justification is required.</div>
       </div>
 
-      <!-- Row 2 (right column): Submit button, right-aligned -->
-      <div style="text-align:right;align-self:end">
+      <!-- Row 3: Submit on its own row, right aligned -->
+      <div style="grid-column:1 / 3; text-align:right; margin-top:4px">
         <button class="btn" id="btnSubmit">Submit</button>
       </div>
     </div>
@@ -262,11 +261,10 @@ function show(step){
   step2.style.display = step===2?'block':'none';
   step3.style.display = step===3?'block':'none';
   current = step;
-  // Back hidden on Screen-1
-  btnBack.classList.toggle('hide', current===1);
+  btnBack.classList.toggle('hide', current===1);   // hide on Screen-1 only
   refreshTopNext();
 }
-btnBack.onclick = ()=> show(current>1 ? current-1 : 1);   // from Screen-3 -> Screen-2
+btnBack.onclick = ()=> show(current>1 ? current-1 : 1); // from 3 -> 2
 btnClose.onclick = ()=> notifyParentClose();
 function notifyParentClose(payload){
   try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
@@ -302,8 +300,8 @@ function fyWindowStrings(todayStr){
 let selected = new Set();
 
 function validateDuration(){
-  const chosen = dt.value;                  // 'YYYY-MM-DD'
-  const today  = todayISTYMD();             // IST today
+  const chosen = dt.value;
+  const today  = todayISTYMD();
   const {start,end} = fyWindowStrings(today);
 
   let ok = false;
@@ -318,14 +316,13 @@ function validateDuration(){
 }
 function step1Ready(){ return prAgreement && prTraining; }
 function step2Ready(){ return selected.size>0 && validateDuration(); }
-
 function refreshTopNext(){
   if(current===1)      btnTopNext.disabled = !step1Ready();
   else if(current===2) btnTopNext.disabled = !step2Ready();
   else                 btnTopNext.disabled = true;
 }
 
-/* Set default date = IST today */
+/* default date = IST today */
 (function presetDateToToday(){
   dt.value = todayISTYMD();
   validateDuration();
@@ -333,7 +330,7 @@ function refreshTopNext(){
 })();
 dt.addEventListener('change', ()=>{ validateDuration(); refreshTopNext(); });
 
-/* Users list + chips (uses displayName) */
+/* Users list + chips */
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
@@ -368,10 +365,10 @@ renderRows();
 searchBox.addEventListener('input', renderRows);
 btnClear.onclick = ()=>{ searchBox.value=''; selected.clear(); renderChips(); renderRows(); refreshTopNext(); };
 
-/* Top-right NEXT across steps */
+/* NEXT across steps */
 btnTopNext.onclick = ()=>{
   if(current===1 && step1Ready()){
-    show(2);  // Screen-2
+    show(2);
     return;
   }
   if(current===2 && step2Ready()){
@@ -386,7 +383,7 @@ btnTopNext.onclick = ()=>{
 cCancel.onclick = ()=> confirm.style.display='none';
 cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
 
-/* =================== STEP 3: Title & BZ =================== */
+/* =================== STEP 3 =================== */
 function validateBZ(){ const ok = bz.value.trim().length>0; bzErr.style.display = ok?'none':'block'; return ok; }
 bz.addEventListener('input', validateBZ);
 
@@ -414,19 +411,9 @@ btnSubmit.onclick = ()=>{
   feedback.style.display='flex';
 };
 
-/* FEEDBACK */
+/* FEEDBACK (right-aligned, equal widths) */
 fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
-fbOK.onclick = ()=>{
-  /* ----- PUSH: store feedback (optional) -----
-     fetch('<<FEEDBACK_API>>',{
-       method:'POST',
-       headers:{'content-type':'application/json'},
-       body: JSON.stringify({ text: fb.value })
-     });
-  ------------------------------------------------*/
-  feedback.style.display='none';
-  notifyParentClose({result:'ok', feedback: fb.value});
-};
+fbOK.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok', feedback: fb.value}); };
 </script>
 </body>
 </html>
