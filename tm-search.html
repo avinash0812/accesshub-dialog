@@ -1,375 +1,373 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Request Actual Access — Search1</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Request Actual Access — Search</title>
 <style>
   :root{
-    --teams-bg:#f5f5f7; --card:#fff; --text:#1f2937; --muted:#6b7280;
-    --border:#e5e7eb; --primary:#2563eb; --primary-pressed:#1e4fc7;
-    --accent:#dbeafe; --pill:#eef2ff; --pill-text:#1e40af; --danger:#b91c1c;
-    --radius:14px;
+    --bg:#f6f8fb;--card:#ffffff;--ink:#1f2937;--muted:#6b7280;
+    --accent:#0b5d7a;--accent-2:#0e6f96;--ok:#1f9d55;--chip:#eef6fb;
+    --line:#e5e7eb;--danger:#b00020;
   }
-  html,body{margin:0;height:100%;background:var(--teams-bg);color:var(--text);
-    font-family:Segoe UI,Arial,sans-serif}
-  .wrap{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:24px}
-  .card{width:min(1100px,95vw);background:var(--card);border:1px solid var(--border);
-    border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06);padding:20px}
-  .title{font-weight:700;font-size:20px}
-  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .muted{color:var(--muted);font-size:12px}
-  .toolbar{display:grid;gap:10px;grid-template-columns:260px 140px 1fr 110px}
-  label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}
-  select,input[type="text"],input[type="date"]{height:40px;border:1px solid var(--border);
-    border-radius:10px;padding:0 12px;background:#fff;width:100%;font-size:14px;outline:none}
-  .btn{height:40px;border:0;border-radius:10px;padding:0 16px;cursor:pointer;font-weight:600}
-  .btn.primary{background:var(--primary);color:#fff}
-  .btn.primary:hover{background:var(--primary-pressed)}
-  .btn.ghost{background:#fff;border:1px solid var(--border)}
-  .right{display:flex;gap:8px;justify-content:flex-end;align-items:center}
-  .sep{height:1px;background:var(--border);margin:12px 0}
-  /* Table (tighter) */
-  table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
-  thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
-  tbody tr{background:#fff;border:1px solid var(--border);border-radius:12px}
-  tbody td{padding:10px}
-  tbody tr td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
-  tbody tr td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
-  .pill{display:inline-block;background:var(--pill);color:var(--pill-text);
-    border-radius:999px;padding:2px 10px;font-size:12px}
-  /* Selected users chips row */
-  .chips{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--border);
-    border-radius:10px;min-height:44px}
-  .chip{background:var(--accent);color:#1e3a8a;border-radius:999px;padding:4px 10px;font-size:12px}
-  /* Section header with blue underline */
-  .section h3{margin:14px 0 6px;font-size:16px}
-  .underline{height:6px;background:#bfd2ff;border-radius:3px;margin:-4px 0 8px;width:280px}
-  /* Validation */
-  .error{color:var(--danger);font-size:12px;margin-top:6px}
-  /* Footer */
-  .footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  h1{font-size:18px;margin:0 0 12px}
+  .wrap{max-width:1100px;margin:18px auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .toolbar{display:grid;grid-template-columns:240px 120px 1fr 96px;gap:6px;align-items:end}
+  label{display:block;font-weight:600;margin-bottom:4px}
+  select,input[type="text"],input[type="date"]{
+    width:100%;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;outline:none;background:#fff
+  }
+  select:focus,input:focus{border-color:var(--accent)}
+  .btn{height:36px;border-radius:10px;border:0;padding:0 14px;color:#fff;background:var(--accent);cursor:pointer}
+  .btn:hover{background:var(--accent-2)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.ok{background:var(--ok)}
+  .btn.danger{background:var(--danger)}
+  .sep{height:1px;background:var(--line);margin:8px 0}
+  .section h3{margin:10px 0 4px;font-size:15px}
+  .underline{height:4px;background:var(--accent);border-radius:2px;width:220px;margin:-2px 0 6px}
+  .muted{color:var(--muted);font-size:11.5px}
+
+  /* Selected chips */
+  .chips{display:flex;gap:6px;flex-wrap:wrap;min-height:36px;padding:6px;border:1px dashed var(--line);border-radius:10px;background:#fff}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid #dbe9f3;border-radius:999px;padding:2px 8px;font-size:11.5px}
+  .chip button{border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:14px;line-height:1}
+  .chip button:hover{color:#000}
+
+  /* Table */
+  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:separate;border-spacing:0 2px;margin-top:6px}
+  thead th{position:sticky;top:0;background:#f1f5f9;color:#334155;padding:6px 10px;text-align:left;font-size:11.5px}
+  tbody td{padding:6px 10px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  tbody tr{transition:background .12s;border-radius:10px}
+  tbody tr:hover{background:#f7fbfe}
+  .row-actions{display:flex;gap:6px;align-items:center}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px}
+
+  .footer{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:6px}
+
   /* Modal */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;
-    align-items:center;justify-content:center;z-index:50}
-  .modal{background:#fff;border:1px solid var(--border);border-radius:14px;
-    width:min(560px,92vw);padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-  .modal h4{margin:0 0 8px}
-  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+  .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);display:none;align-items:center;justify-content:center;padding:12px}
+  .modal{background:#fff;border-radius:12px;max-width:520px;width:100%;padding:14px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .modal h4{margin:0 0 6px}
+  .modal .list{padding-left:18px;margin:4px 0 10px}
+  .modal .actions{display:flex;justify-content:flex-end;gap:8px}
+  .center-note{font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* ===== Compact overrides for tight vertical rhythm ===== */
+  .wrap{ padding:16px; }
+  .card{ padding:14px; }
+  .toolbar{ gap:6px; grid-template-columns:240px 120px 1fr 96px; }
+  label{ margin-bottom:4px; }
+  select, input[type="text"], input[type="date"]{ height:36px; }
+  .sep{ margin:8px 0; }
+  .section h3{ margin:10px 0 4px; font-size:15px; }
+  .underline{ height:4px; margin:-2px 0 6px; width:220px; }
+  .chips{ padding:6px; min-height:36px; }
+  .chip{ padding:2px 8px; font-size:11.5px; }
+  table{ border-spacing:0 2px; margin-top:6px; }
+  thead th{ padding:6px 10px; }
+  tbody td{ padding:6px 10px; }
+  .btn{ height:36px; padding:0 12px; }
+  .footer{ margin-top:6px; }
+  .muted{ font-size:11.5px; }
+  .modal{ padding:14px; }
+  @media (max-height: 800px){
+    .card{padding:12px}
+    select,input[type="text"],input[type="date"],.btn{height:34px}
+    tbody td{padding:5px 8px}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card" role="dialog" aria-label="Request Actual Access — Search">
-    <div class="header">
-      <div class="title">Request Actual Access — Search</div>
-      <div class="muted"><span id="selCount">0</span> selected</div>
-    </div>
+  <div class="wrap">
+    <h1>Request Actual Access — Search</h1>
 
-    <!-- Search toolbar -->
-    <div class="toolbar">
-      <div>
-        <label>Login User</label>
-        <select id="loginUser">
-          <option value="All" selected>All (User1 + User3)</option>
-          <option value="User1">User1</option>
-          <option value="User2">User2</option>
-          <option value="User3">User3</option>
-          <option value="User4">User4</option>
-        </select>
-      </div>
-      <div>
-        <label>Show</label>
-        <select id="showCount">
-          <option value="10">10</option>
-          <option value="20" selected>20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </div>
-      <div>
-        <label>Search alias or name</label>
-        <input id="query" type="text" placeholder="e.g., akanoo or Ashish Kanoongo"/>
-      </div>
-      <div class="right">
-        <button id="btnSearch" class="btn primary">Search</button>
-      </div>
-    </div>
+    <div class="card">
+      <!-- Search toolbar -->
+      <div class="toolbar">
+        <div>
+          <label for="loginUser">Login User</label>
+          <select id="loginUser"></select>
+        </div>
 
-    <div class="muted" style="margin-top:6px">
-      Button-based search (no type-ahead) for performance. Sorted by alias A→Z.
-    </div>
+        <div>
+          <label for="showN">Show</label>
+          <select id="showN">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="All">All</option>
+          </select>
+        </div>
 
-    <div class="sep"></div>
+        <div>
+          <label for="q">Search alias or name</label>
+          <input id="q" type="text" placeholder="Type alias or name and click Search" />
+        </div>
 
-    <!-- Selected Users -->
-    <div class="section">
-      <h3>Selected Users</h3>
-      <div class="underline"></div>
-      <div id="chipRow" class="chips" aria-live="polite"></div>
-    </div>
-
-    <!-- Results table -->
-    <table aria-label="Search results">
-      <thead>
-        <tr>
-          <th style="width:44px;"><input id="chkAll" type="checkbox" title="Select all on page"/></th>
-          <th style="width:140px;">Alias</th>
-          <th>Name</th>
-          <th style="width:160px;">Login User</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-
-    <div class="sep"></div>
-
-    <!-- Access Duration -->
-    <div class="section">
-      <h3>Access Duration</h3>
-      <div class="underline"></div>
-      <label for="dt">Enter Duration <span style="color:#b91c1c">*</span></label>
-      <div style="display:grid;grid-template-columns:260px auto;gap:12px;align-items:center">
-        <input id="dt" type="date"/>
-        <div class="muted">
-          <div>Note:</div>
-          <div>1. Date cannot be today or before today.</div>
-          <div>2. Date cannot be after the current fiscal year end (Jul&nbsp;25 → Jun&nbsp;26).</div>
+        <div>
+          <button class="btn" id="btnSearch">Search</button>
         </div>
       </div>
-      <div id="dtErr" class="error" role="alert" aria-live="polite"></div>
-    </div>
 
-    <div class="footer">
-      <span class="muted">Review selections and choose a valid duration.</span>
-      <div class="right">
-        <button class="btn ghost" onclick="window.close()">Close</button>
-        <button id="btnNext" class="btn primary">Next</button>
+      <div class="sep"></div>
+
+      <!-- Selected users -->
+      <div class="section">
+        <h3>Selected Users</h3>
+        <div class="underline"></div>
+        <div id="chips" class="chips" aria-live="polite"></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- Results table -->
+      <div class="section">
+        <h3>Results</h3>
+        <div class="underline"></div>
+        <div class="table-wrap">
+          <table id="tbl">
+            <thead>
+              <tr>
+                <th style="width:36px">Add</th>
+                <th>Alias</th>
+                <th>Name</th>
+                <th style="width:140px">Login User</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="muted" id="countNote">0 results</div>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- Access duration -->
+      <div class="section">
+        <h3>Access Duration</h3>
+        <div class="underline"></div>
+        <div style="max-width:280px">
+          <label for="when">Enter Duration <span class="muted">*</span></label>
+          <input type="date" id="when" />
+          <div class="muted">The date cannot be today, before today or later than the current fiscal year (July 25 – Jun 26).</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button class="btn ghost" id="btnClear">Clear</button>
+        <button class="btn" id="btnNext">Next</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Centered modal -->
-<div id="modalHost" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="modal">
-    <h4 id="modalTitle">Confirm submission</h4>
-    <div id="modalBody" class="muted"></div>
-    <div class="sep"></div>
-    <div class="right">
-      <button id="btnCancel" class="btn ghost">Cancel</button>
-      <button id="btnConfirm" class="btn primary">Confirm</button>
+  <!-- Modal -->
+  <div class="backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <h4 id="confirmTitle">Confirm selection</h4>
+      <div id="confirmBody" class="muted"></div>
+      <ul id="confirmList" class="list"></ul>
+      <div class="actions">
+        <button class="btn ghost" id="mClose">Close</button>
+        <button class="btn ok" id="mConfirm">Submit</button>
+      </div>
+      <div class="center-note">This dialog is centered over the task module and returns data back to Copilot Studio.</div>
     </div>
   </div>
-</div>
 
 <script>
-/* ---------- Static dataset (POC) ---------- */
+/* ============== Static demo data ============== */
 const DATA = [
-  { loginuser:"User1", alias:"akanoo",  name:"Ashish Kanoongo" },
-  { loginuser:"User1", alias:"jdoe",    name:"John Doe" },
-  { loginuser:"User1", alias:"mshah",   name:"Meera Shah" },
-  { loginuser:"User1", alias:"sgeorge", name:"Sam George" },
-  { loginuser:"User1", alias:"pk",      name:"Priya K" },
-  { loginuser:"User1", alias:"alexr",   name:"Alex R" },
-  { loginuser:"User1", alias:"chenl",   name:"Chen Li" },
+  { loginuser:"User1", alias:"akanoo", name:"Ashish Kanoongo" },
+  { loginuser:"User1", alias:"jdoe",   name:"John Doe" },
+  { loginuser:"User1", alias:"mshah",  name:"Meera Shah" },
+  { loginuser:"User1", alias:"sgeorge",name:"Sam George" },
+  { loginuser:"User1", alias:"pk",     name:"Priya K" },
+  { loginuser:"User1", alias:"alexr",  name:"Alex R" },
+  { loginuser:"User1", alias:"chenl",  name:"Chen Li" },
 
-  { loginuser:"User2", alias:"katew",   name:"Kate W" },
-  { loginuser:"User2", alias:"omarh",   name:"Omar H" },
-  { loginuser:"User2", alias:"sarab",   name:"Sara B" },
-  { loginuser:"User2", alias:"timq",    name:"Tim Q" },
-  { loginuser:"User2", alias:"ninad",   name:"Nina D" },
-  { loginuser:"User2", alias:"vikz",    name:"Vik Z" },
+  { loginuser:"User2", alias:"katew",  name:"Kate W" },
+  { loginuser:"User2", alias:"omarh",  name:"Omar H" },
+  { loginuser:"User2", alias:"sarab",  name:"Sara B" },
+  { loginuser:"User2", alias:"timq",   name:"Tim Q" },
+  { loginuser:"User2", alias:"ninad",  name:"Nina D" },
+  { loginuser:"User2", alias:"vikz",   name:"Vik Z" },
 
-  { loginuser:"User3", alias:"liamj",   name:"Liam J" },
-  { loginuser:"User3", alias:"isham",   name:"Isha M" },
-  { loginuser:"User3", alias:"ravin",   name:"Ravi N" },
-  { loginuser:"User3", alias:"olgap",   name:"Olga P" },
+  { loginuser:"User3", alias:"liamj",  name:"Liam J" },
+  { loginuser:"User3", alias:"isham",  name:"Isha M" },
+  { loginuser:"User3", alias:"ravin",  name:"Ravi N" },
+  { loginuser:"User3", alias:"olgap",  name:"Olga P" },
 
-  { loginuser:"User4", alias:"zedx",    name:"Zed X" },
-  { loginuser:"User4", alias:"riak",    name:"Riak" },
-  { loginuser:"User4", alias:"dev_1",   name:"Dev One" },
+  { loginuser:"User4", alias:"zedx",   name:"Zed X" },
+  { loginuser:"User4", alias:"riak",   name:"Riak" },
+  { loginuser:"User4", alias:"dev_1",  name:"Dev One" },
 ];
 
-/* ---------- Elements ---------- */
-const elLogin   = document.getElementById('loginUser');
-const elShow    = document.getElementById('showCount');
-const elQuery   = document.getElementById('query');
-const elRows    = document.getElementById('rows');
-const elSelCnt  = document.getElementById('selCount');
-const elChkAll  = document.getElementById('chkAll');
-const elChipRow = document.getElementById('chipRow');
-const elDt      = document.getElementById('dt');
-const elDtErr   = document.getElementById('dtErr');
-const modalHost = document.getElementById('modalHost');
-const modalBody = document.getElementById('modalBody');
-
-/* ---------- QS init ---------- */
-const qs = new URLSearchParams(location.search);
-function initFromQuery(){
-  const qUser = qs.get('loginuser');
-  const qShow = qs.get('show');
-  const qText = qs.get('q');
-  if (["All","User1","User2","User3","User4"].includes(qUser)) elLogin.value = qUser;
-  if (qShow && !Number.isNaN(+qShow)) elShow.value = qShow;
-  if (qText) elQuery.value = qText;
+/* Merge User1 + User3 as requested for the view */
+const MERGE_USER13 = true; // toggle if needed
+let viewData = [...DATA];
+if (MERGE_USER13){
+  viewData = DATA.map(r => r.loginuser === "User3" ? ({...r, loginuser:"User1"}) : r);
 }
 
-/* ---------- Data view ---------- */
-function currentDataset(){
-  if (elLogin.value === "All")
-    return DATA.filter(x => x.loginuser === "User1" || x.loginuser === "User3");
-  return DATA.filter(x => x.loginuser === elLogin.value);
+/* ============== Elements ============== */
+const loginSel = document.getElementById('loginUser');
+const showSel  = document.getElementById('showN');
+const qInp     = document.getElementById('q');
+const tblBody  = document.getElementById('rows');
+const countEl  = document.getElementById('countNote');
+const chipsEl  = document.getElementById('chips');
+const whenInp  = document.getElementById('when');
+
+const btnSearch= document.getElementById('btnSearch');
+const btnClear = document.getElementById('btnClear');
+const btnNext  = document.getElementById('btnNext');
+
+const backdrop = document.getElementById('backdrop');
+const mClose   = document.getElementById('mClose');
+const mConfirm = document.getElementById('mConfirm');
+const confirmBody = document.getElementById('confirmBody');
+const confirmList = document.getElementById('confirmList');
+
+/* ============== State ============== */
+const selected = new Map(); // alias -> record
+
+/* ============== Helpers ============== */
+const byAlias = (a,b)=> a.alias.localeCompare(b.alias, undefined, {sensitivity:'base'});
+function uniq(arr, key){ const seen=new Set(); return arr.filter(x=>!seen.has(x[key]) && seen.add(x[key])); }
+function readParams(){
+  const u = new URLSearchParams(location.search);
+  return {
+    loginuser: u.get('loginuser') || 'All',
+    show:      u.get('show') || '20',
+    q:         u.get('q') || ''
+  };
 }
-
-function search(){
-  const q = (elQuery.value || "").trim().toLowerCase();
-  let list = currentDataset();
-  if (q){
-    list = list.filter(x =>
-      x.alias.toLowerCase().includes(q) ||
-      (x.name||"").toLowerCase().includes(q)
-    );
-  }
-  list.sort((a,b)=> a.alias.localeCompare(b.alias));
-  const take = Math.max(1, +elShow.value || 20);
-  render(list.slice(0, take));
+function fillLoginOptions(){
+  const users = uniq(viewData.map(r=>({loginuser:r.loginuser})), 'loginuser').map(x=>x.loginuser).sort();
+  loginSel.innerHTML = `<option value="All">All</option>` + users.map(u=>`<option value="${u}">${u}</option>`).join('');
 }
-
-function render(items){
-  elRows.innerHTML = "";
-  elChkAll.checked = false;
-  updateCount();
-
-  if (!items.length){
-    elRows.innerHTML = `<tr><td colspan="4" class="muted" style="padding:16px;">No results.</td></tr>`;
+function renderChips(){
+  chipsEl.innerHTML = '';
+  if (selected.size === 0){
+    chipsEl.innerHTML = `<span class="muted">No users selected.</span>`;
     return;
   }
-
-  for (const it of items){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input type="checkbox" class="rowchk" data-alias="${it.alias}" data-name="${escapeHtml(it.name||"")}"></td>
-      <td><span class="pill">${it.alias}</span></td>
-      <td>${escapeHtml(it.name||"")}</td>
-      <td>${it.loginuser}</td>`;
-    elRows.appendChild(tr);
-  }
-
-  document.querySelectorAll('.rowchk').forEach(cb=>{
-    cb.addEventListener('change', ()=>{ updateCount(); renderChips(); });
+  [...selected.values()].sort(byAlias).forEach(r=>{
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `<span>${r.alias}</span><button title="Remove" aria-label="Remove ${r.alias}">×</button>`;
+    chip.querySelector('button').onclick = ()=>{ selected.delete(r.alias); renderChips(); };
+    chipsEl.appendChild(chip);
   });
-  renderChips();
 }
-
-function getSelectedAliases(){
-  return [...document.querySelectorAll('.rowchk:checked')].map(x=>x.dataset.alias);
-}
-function getSelectedNames(){
-  return [...document.querySelectorAll('.rowchk:checked')].map(x=>x.dataset.name);
-}
-
-function updateCount(){
-  elSelCnt.textContent = getSelectedAliases().length;
-}
-
-function renderChips(){
-  const aliases = getSelectedAliases();
-  elChipRow.innerHTML = aliases.length
-    ? aliases.map(a=>`<span class="chip mono">${a}</span>`).join("")
-    : `<span class="muted">No users selected.</span>`;
-}
-
-/* ---------- Date rules ---------- */
-function fiscalBounds(d){
-  // FY: Jul 25 -> Jun 26
-  const y = d.getFullYear();
-  const july25_this = new Date(y, 6, 25); // month 6 = July
-  let start, end;
-  if (d >= july25_this){
-    start = new Date(y, 6, 25);
-    end   = new Date(y+1, 5, 26); // Jun 26 next year
-  } else {
-    start = new Date(y-1, 6, 25);
-    end   = new Date(y, 5, 26);   // Jun 26 this year
+function filterData(){
+  const who = loginSel.value;
+  const q = qInp.value.trim().toLowerCase();
+  let rows = viewData;
+  if (who !== 'All') rows = rows.filter(r=>r.loginuser === who);
+  if (q){
+    rows = rows.filter(r => r.alias.toLowerCase().includes(q) || r.name.toLowerCase().includes(q));
   }
-  return {start,end};
+  rows.sort(byAlias);
+  const n = showSel.value === 'All' ? rows.length : Number(showSel.value||0);
+  return rows.slice(0, n);
 }
-function toISO(d){ return d.toISOString().slice(0,10); }
-function formatDMY(d){
-  return String(d.getDate()).padStart(2,'0') + "/" +
-         String(d.getMonth()+1).padStart(2,'0') + "/" +
-         d.getFullYear();
+function renderTable(){
+  const rows = filterData();
+  countEl.textContent = `${rows.length} result${rows.length!==1?'s':''}`;
+  tblBody.innerHTML = rows.map(r=>`
+    <tr>
+      <td>
+        <button class="btn" style="height:28px;padding:0 8px" data-add="${r.alias}">Add</button>
+      </td>
+      <td><span class="pill">${r.alias}</span></td>
+      <td>${r.name}</td>
+      <td>${r.loginuser}</td>
+    </tr>
+  `).join('');
+  // Attach handlers
+  tblBody.querySelectorAll('[data-add]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const alias = e.currentTarget.getAttribute('data-add');
+      const rec = filterData().find(x=>x.alias===alias) || viewData.find(x=>x.alias===alias);
+      if (rec){ selected.set(alias, rec); renderChips(); }
+    });
+  });
 }
-function validateDate(){
-  elDtErr.textContent = "";
-  if (!elDt.value) return false;
-  const picked = new Date(elDt.value + "T00:00:00");
+
+/* ============== Validation ============== */
+function validDate(dStr){
+  if (!dStr) return false;
+  const d = new Date(dStr);
   const today = new Date(); today.setHours(0,0,0,0);
-  if (+picked <= +today){ elDtErr.textContent = "Please choose a date after today."; return false; }
-  const {end} = fiscalBounds(today);
-  if (+picked > +end){ elDtErr.textContent = `Date must be on or before ${formatDMY(end)} (FY end).`; return false; }
-  return true;
+  if (d <= today) return false;
+  // crude fiscal guard July 25 to next Jun 26 (demo only)
+  const fyStart = new Date(today.getFullYear(), 6, 25); // Jul 25
+  const fyEnd   = new Date(today.getFullYear()+1, 5, 26); // Jun 26 next year
+  return (d >= fyStart && d <= fyEnd);
 }
 
-/* ---------- Modal ---------- */
-function openModal(html){
-  modalBody.innerHTML = html;
-  modalHost.style.display = "flex";
-  modalHost.setAttribute("aria-hidden","false");
+/* ============== Modal ============== */
+function openModal(){
+  const when = whenInp.value;
+  const list = [...selected.values()].sort(byAlias);
+  confirmBody.innerHTML = list.length === 0
+    ? `No users selected.`
+    : `You’re about to request access for <strong>${list.length}</strong> user(s) on <strong>${formatDate(when)}</strong>:`;
+  confirmList.innerHTML = list.map(r=>`<li><code>${r.alias}</code> — ${r.name}</li>`).join('');
+  backdrop.style.display = 'flex';
 }
-function closeModal(){
-  modalHost.style.display = "none";
-  modalHost.setAttribute("aria-hidden","true");
+function closeModal(){ backdrop.style.display = 'none'; }
+function formatDate(iso){
+  if (!iso) return '(no date)';
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'});
 }
 
-/* ---------- Events ---------- */
-document.getElementById('btnSearch').addEventListener('click', search);
-elLogin.addEventListener('change', search);
-elShow.addEventListener('change', search);
-elChkAll.addEventListener('change', ()=>{
-  const checks = document.querySelectorAll('.rowchk');
-  checks.forEach(cb => cb.checked = elChkAll.checked);
-  updateCount(); renderChips();
+/* ============== Wire up ============== */
+fillLoginOptions();
+const p = readParams();
+loginSel.value = [...Array.from(loginSel.options)].some(o=>o.value===p.loginuser) ? p.loginuser : 'All';
+showSel.value  = p.show;
+qInp.value     = p.q;
+
+renderTable(); renderChips();
+
+btnSearch.addEventListener('click', renderTable);
+showSel.addEventListener('change', renderTable);
+loginSel.addEventListener('change', renderTable);
+qInp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); renderTable(); } });
+
+btnClear.addEventListener('click', ()=>{
+  qInp.value=''; selected.clear(); renderChips(); renderTable();
 });
-elDt.addEventListener('change', validateDate);
 
-document.getElementById('btnNext').addEventListener('click', ()=>{
-  if (!validateDate()) { elDt.focus(); return; }
-  const aliases = getSelectedAliases();
-  const when = new Date(elDt.value + "T00:00:00");
-  const list = aliases.length ? aliases.map(a=>`<div class="mono">${a}</div>`).join("") : "<div>(none selected)</div>";
-  openModal(`
-    <div>Following user(s) are selected for <b>${formatDMY(when)}</b>:</div>
-    <div style="margin-top:8px">${list}</div>
-  `);
+btnNext.addEventListener('click', ()=>{
+  if (selected.size === 0){ alert('Please select at least one user.'); return; }
+  if (!validDate(whenInp.value)){ alert('Please pick a valid date (after today and within this fiscal year).'); return; }
+  openModal();
 });
 
-document.getElementById('btnCancel').addEventListener('click', closeModal);
-document.getElementById('btnConfirm').addEventListener('click', ()=>{
+mClose.addEventListener('click', closeModal);
+backdrop.addEventListener('click', (e)=>{ if(e.target===backdrop) closeModal(); });
+
+mConfirm.addEventListener('click', ()=>{
+  // In production, postMessage this payload to the parent task module or return via Teams SDK.
   const payload = {
-    loginUser: elLogin.value,
-    date: elDt.value,
-    aliases: getSelectedAliases()
+    action: 'tmSearchSubmit',
+    when: whenInp.value,
+    users: [...selected.values()].map(({loginuser,alias,name})=>({loginuser,alias,name}))
   };
-  // POC: show result. In production, postMessage or call API.
-  alert("Submitting:\n" + JSON.stringify(payload,null,2));
+  console.log('Submit payload:', payload);
+  alert('Submitted!\n\n' + JSON.stringify(payload,null,2));
   closeModal();
 });
-
-/* ---------- Boot ---------- */
-(function boot(){
-  // set date bounds in control (min: tomorrow, max: FY end)
-  const today = new Date(); today.setHours(0,0,0,0);
-  const tomorrow = new Date(+today + 86400000);
-  const {end} = fiscalBounds(today);
-  elDt.min = toISO(tomorrow);
-  elDt.max = toISO(end);
-
-  initFromQuery();
-  search();
-})();
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 </script>
 </body>
 </html>
