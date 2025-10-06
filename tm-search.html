@@ -2,504 +2,458 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Request Actual Access — Task Module</title>
-
-<!-- Base styles (kept same look) -->
 <style>
   :root{
-    --brand:#135a73;        /* same blue you’ve been using */
-    --brand-2:#0e485c;
-    --danger:#b91c1c;
-    --muted:#6b7280;
-    --border:#d7dde2;
-    --bg:#f7f9fb;
+    --brand:#0e5a73;           /* button, links */
+    --brand-dark:#0b495d;
     --fg:#0f172a;
+    --muted:#6b7280;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --danger:#b91c1c;
+    --ok:#065f46;
+    --row-h:38px;              /* tighter rows as requested */
+    --radius:10px;
   }
-  html,body{margin:0;padding:0;background:#fff;color:var(--fg);font:16px/1.3 "Segoe UI",Arial,Helvetica,sans-serif}
-  .wrap{max-width:1080px;margin:18px auto;padding:0 16px}
-  h1{font-size:20px;margin:0 0 12px 0}
-  h2{font-size:18px;margin:0 0 10px 0}
-  .card{border:1px solid var(--border);border-radius:8px;padding:16px}
-  .row{display:flex;gap:18px;align-items:flex-start}
-  .col{flex:1 1 0}
-  .label{font-weight:600;margin:12px 0 6px}
-  .muted{color:var(--muted)}
-  .req::after{content:" *";color:var(--danger);font-weight:700}
-  input[type="text"],input[type="date"],select,textarea{
-    width:100%;box-sizing:border-box;border:1px solid var(--border);
-    border-radius:6px;padding:10px 12px;background:#fff
-  }
-  textarea{min-height:120px}
-  .btn{
-    appearance:none;border:0;border-radius:9px;padding:10px 18px;cursor:pointer;
-    background:var(--brand);color:#fff;font-weight:600
-  }
-  .btn:hover{background:var(--brand-2)}
-  .btn.secondary{background:#e5eef2;color:#0b2c3a}
-  .btn.muted{background:#dfe7ec;color:#0b2c3a}
+  html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+  .shell{max-width:1100px;margin:24px auto;padding:0 16px;}
+  .card{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);box-shadow:0 1px 2px rgba(0,0,0,.04);padding:20px;}
+  .hdr{display:flex;align-items:center;gap:12px;margin:0 0 14px 0}
+  .hdr h1{font-size:20px;margin:0}
+  .bar{display:flex;justify-content:space-between;align-items:center;margin:8px 0 16px}
+  .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
   .btn:disabled{opacity:.5;cursor:not-allowed}
-
-  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .toolbar .left{display:flex;gap:8px;align-items:center}
-  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:20px;padding:6px 10px;margin:6px 8px 0 0}
-  .chip .x{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;background:#eee;cursor:pointer}
-
-  /* ---------- users table (tight rows, no layout change) ---------- */
-  table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden}
-  thead th{background:#f2f6f9;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
-  tbody td{padding:6px 12px;line-height:1.2;border-bottom:1px solid var(--border)}   /* tightened */
-  tbody tr:last-child td{border-bottom:0}
-  tbody td .btn{margin:0}
-
-  /* errors/notes */
-  .error{color:var(--danger);font-size:13px;margin-top:6px;display:none}
-  .note{font-size:12px;color:#475569;margin-top:6px}
-
-  /* sections (screens) */
-  .section{display:none}
-  .section.active{display:block}
-
-  /* ---------- modals (centered) ---------- */
-  .modal{
-    position:fixed;inset:0;display:none;background:rgba(8,15,30,.45);
-    z-index:50;align-items:center;justify-content:center;padding:16px
+  .btn.secondary{background:#e5eef2;color:var(--brand);font-weight:700}
+  .btn.ghost{background:#ffffff;border:1px solid #cbd5e1;color:var(--fg)}
+  .btn.flat{background:transparent;color:var(--brand);padding:6px 10px}
+  .btn:hover{background:var(--brand-dark)}
+  .btn.secondary:hover{background:#d6e5ec}
+  .btn.ghost:hover{background:#f1f5f9}
+  .row{display:flex;gap:16px;align-items:center;margin:8px 0}
+  .row > *{flex:1}
+  label{font-weight:700}
+  .req::after{content:" *"; color:var(--danger); font-weight:800}
+  input[type="date"],input[type="text"],textarea,select{
+    width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
   }
-  .modal.open{display:flex}
-  .modal .modal-content{
-    background:#fff;border-radius:10px;max-width:640px;width:100%;
-    box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden
-  }
-  .modal-header{padding:14px 18px;border-bottom:1px solid var(--border)}
-  .modal-title{margin:0;font-size:18px}
-  .modal-body{padding:14px 18px}
-  .modal-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-
-  /* feedback textarea should never overflow frame */
-  #feedbackText{width:100% !important;box-sizing:border-box;height:130px;max-height:180px;resize:vertical}
-
-  .confirm-list{margin:8px 0 0 0;padding-left:18px}
-  .bar{height:1px;background:var(--border);margin:12px 0}
+  textarea{min-height:110px; resize:vertical}
+  .muted{color:var(--muted);font-size:12px}
+  .err{color:var(--danger);font-weight:600;margin-top:6px}
+  .ok{color:var(--ok);font-weight:700}
+  .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
+  .list th, .list td{padding:6px 10px; border-bottom:1px solid #eef2f7}
+  .list tr{height:var(--row-h)}
+  .list th{background:#f1f5f9;text-align:left;font-size:14px}
+  .pill{display:inline-flex;gap:8px;align-items:center;background:#eef6fb;border:1px solid #cfe3ee;color:#083344;padding:4px 10px;border-radius:999px;margin:4px 6px 0 0}
+  .x{font-weight:900;cursor:pointer}
+  .section-title{margin:10px 0 6px;font-size:18px;border-top:3px solid #5b9bd5;padding-top:10px}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal .panel{background:#fff;width:min(680px,96vw);border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .modal .head{padding:12px 16px;border-bottom:1px solid #eef2f7;font-weight:700}
+  .modal .body{padding:16px}
+  .modal .foot{padding:14px 16px;border-top:1px solid #eef2f7;display:flex;gap:10px;justify-content:flex-end}
+  .center-actions{display:flex;gap:10px}
+  /* small helpers */
+  .space{height:6px}
 </style>
 </head>
-
 <body>
-<div class="wrap">
-  <h1>Request Actual Access — Search</h1>
+<div class="shell">
+  <div class="bar">
+    <div class="center-actions">
+      <button class="btn ghost" id="btnBack">&larr; Back</button>
+      <button class="btn flat" id="btnClose">Close</button>
+    </div>
+    <strong>Request Actual Access</strong>
+  </div>
 
-  <!-- Screen 1: Pre-requisites -->
-  <section id="screen1" class="section active">
-    <div class="card">
-      <div class="toolbar">
-        <div class="left">
-          <button id="s1Back" class="btn secondary">← Back</button>
-        </div>
+  <!-- PRE-REQ (STEP 1) -->
+  <section class="card" id="step1">
+    <div class="hdr"><h1>Pre-Requisites</h1></div>
+    <div class="muted">Ensuring privacy … (static copy for POC)</div>
+    <div class="space"></div>
+    <div class="row">
+      <div style="flex:0 0 180px;"><label class="req">Agreement</label></div>
+      <div><span id="agreementState" class="ok">Agreement signed.</span></div>
+      <div style="flex:0 0 200px;text-align:right">
+        <button class="btn secondary" id="markAgreement">Mark completed</button>
       </div>
-
-      <h2>Pre-Requisites</h2>
-      <div class="note">Ensuring privacy … morning light slipped across.</div>
-
-      <div class="row" style="margin-top:16px">
-        <div class="col">
-          <div class="label req">Agreement</div>
-          <div id="agreeState" style="font-weight:700">Agreement signed.</div>
-        </div>
-        <div class="col">
-          <div class="label req">Training</div>
-          <div id="trainState" style="font-weight:700">Training Completed</div>
-        </div>
+    </div>
+    <div class="row">
+      <div style="flex:0 0 180px;"><label class="req">Training</label></div>
+      <div><span id="trainingState" class="ok">Training Completed</span></div>
+      <div style="flex:0 0 200px;text-align:right">
+        <button class="btn secondary" id="markTraining">Mark completed</button>
       </div>
-
-      <div class="toolbar" style="margin-top:20px;justify-content:flex-end">
-        <button id="toScreen2" class="btn">Next</button>
-      </div>
+    </div>
+    <div id="step1Err" class="err" style="display:none"></div>
+    <div class="space"></div>
+    <div style="text-align:right">
+      <button class="btn" id="toStep2" disabled>Next</button>
     </div>
   </section>
 
-  <!-- Screen 2: Pick users + duration -->
-  <section id="screen2" class="section">
-    <div class="card">
-      <div class="toolbar">
-        <button id="s2Back" class="btn secondary">← Back</button>
-        <div class="muted">Access Details</div>
+  <!-- USER + DURATION (STEP 2) -->
+  <section class="card" id="step2" style="display:none">
+    <div class="hdr"><h1>Access Details</h1></div>
+
+    <div class="row">
+      <div>
+        <label>Description</label>
+        <input type="text" value="asdasdasdas." aria-label="desc" />
       </div>
+    </div>
 
-      <!-- search row kept simple (no type-ahead) -->
-      <div class="row">
-        <div class="col">
-          <div class="label">Enter <span class="req">user name</span> (preferred approach)</div>
-          <input id="searchBox" type="text" placeholder="Search (alias or display name)" />
-        </div>
-        <div class="col" style="max-width:130px;align-self:end">
-          <button id="searchBtn" class="btn" style="width:100%">Search</button>
-        </div>
+    <div class="row">
+      <div>
+        <label class="req">Enter user name</label>
+        <input type="text" id="searchBox" placeholder="Search" />
       </div>
+      <div style="flex:0 0 120px;align-self:flex-end;text-align:right">
+        <button class="btn secondary" id="btnClear">Clear</button>
+      </div>
+    </div>
 
-      <div class="bar"></div>
-
-      <!-- selected users (chips) -->
-      <div class="label">Selected Username</div>
+    <div>
+      <div class="muted">Selected users</div>
       <div id="chips"></div>
+    </div>
 
-      <div class="bar"></div>
-
-      <!-- duration -->
-      <div class="label req">Enter Duration</div>
-      <div class="row" style="align-items:center">
-        <div class="col" style="max-width:260px">
-          <input id="durationDate" type="date" />
-          <div id="durationError" class="error"></div>
-          <div class="note" id="fyNote">The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).</div>
-        </div>
-        <div class="col" style="max-width:120px">
-          <button id="clearBtn" class="btn muted" style="width:100%">Clear</button>
+    <div class="section-title">Access Duration</div>
+    <div class="row" style="align-items:flex-start">
+      <div style="max-width:320px">
+        <label class="req">Enter Duration</label>
+        <input type="date" id="dt" />
+        <div id="dtErr" class="err" style="display:none"></div>
+        <div class="muted" id="dtNote">
+          The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).
         </div>
       </div>
-
-      <div class="bar"></div>
-
-      <!-- simple table -->
-      <table class="users-table">
-        <thead>
-          <tr><th style="width:30%">Alias</th><th>Display name</th><th style="width:100px"></th></tr>
-        </thead>
-        <tbody id="usersTbody">
-          <!-- rows rendered by JS -->
-        </tbody>
-      </table>
-
-      <div class="toolbar" style="margin-top:14px;justify-content:flex-end">
-        <button id="nextBtn" class="btn">Next</button>
+      <div style="flex:1"></div>
+      <div style="flex:0 0 180px;align-self:flex-end;text-align:right">
+        <button class="btn" id="nextFromStep2" disabled>Next</button>
       </div>
     </div>
+
+    <div class="space"></div>
+    <table class="list" id="tbl">
+      <thead><tr><th style="width:40%">Alias</th><th style="width:40%">Display name</th><th style="width:20%"></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
   </section>
 
-  <!-- Screen 3: Business Justification -->
-  <section id="screen3" class="section">
-    <div class="card">
-      <div class="toolbar">
-        <button id="s3Back" class="btn secondary">← Back</button>
-        <div class="muted">Title</div>
+  <!-- TITLE + JUSTIFICATION (STEP 3) -->
+  <section class="card" id="step3" style="display:none">
+    <div class="hdr"><h1>Title & Business Justification</h1></div>
+
+    <div class="row" style="align-items:flex-end">
+      <div>
+        <label>Current title</label>
+        <div class="pill" title="from HR system">Soft-Architect-Service</div>
       </div>
-
-      <div class="row">
-        <div class="col">
-          <div class="label">Current title</div>
-          <div id="currentTitle">Soft-Architect-Service</div>
-        </div>
-        <div class="col">
-          <div class="label">Your new title</div>
-          <select id="newTitle">
-            <option>Architect</option>
-            <option>Senior Architect</option>
-            <option>Lead</option>
-            <option>Manager</option>
-          </select>
-        </div>
+      <div></div>
+      <div style="max-width:420px">
+        <label>Your new title</label>
+        <select id="newTitle">
+          <option>Architect</option>
+          <option>Senior Architect</option>
+          <option>Principal Engineer</option>
+          <option>Staff Engineer</option>
+        </select>
       </div>
+    </div>
 
-      <div class="label req" style="margin-top:14px">Business Justification</div>
-      <textarea id="justText" placeholder="Enter Business Justification..."></textarea>
-      <div id="justError" class="error">Business Justification is required.</div>
-
-      <div class="toolbar" style="margin-top:14px;justify-content:flex-end">
-        <button id="submitBtn" class="btn">Submit</button>
+    <div class="row" style="align-items:flex-start">
+      <div style="max-width:640px">
+        <label class="req">Business Justification</label>
+        <textarea id="bz"></textarea>
+        <div id="bzErr" class="err" style="display:none">Business justification is required.</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="flex:0 0 180px;align-self:flex-end;text-align:right">
+        <button class="btn" id="btnSubmit">Submit</button>
       </div>
     </div>
   </section>
 </div>
 
-<!-- Confirm selection modal -->
-<div id="confirmModal" class="modal" aria-hidden="true">
-  <div class="modal-content">
-    <div class="modal-header"><h3 class="modal-title">Confirm selection</h3></div>
-    <div class="modal-body">
-      <div id="confirmSummary"></div>
+<!-- CONFIRMATION MODAL -->
+<div class="modal" id="confirm">
+  <div class="panel">
+    <div class="head">Confirm selection</div>
+    <div class="body">
+      <div id="confirmText"></div>
     </div>
-    <div class="modal-footer">
-      <button id="confirmCancelBtn" class="btn secondary">Cancel</button>
-      <button id="confirmOkBtn" class="btn">Confirm</button>
+    <div class="foot">
+      <button class="btn ghost" id="cCancel">Cancel</button>
+      <button class="btn" id="cOK">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- Feedback modal -->
-<div id="fbModal" class="modal" aria-hidden="true">
-  <div class="modal-content">
-    <div class="modal-header"><h3 class="modal-title">Feedback</h3></div>
-    <div class="modal-body">
-      <div class="muted">Optional: share quick feedback about this flow.</div>
-      <textarea id="feedbackText" placeholder="Type a few lines…"></textarea>
+<!-- FEEDBACK MODAL -->
+<div class="modal" id="feedback">
+  <div class="panel">
+    <div class="head">Feedback</div>
+    <div class="body">
+      <div class="muted" style="margin-bottom:8px">Optional: share quick feedback about this flow.</div>
+      <textarea id="fb" style="min-height:110px"></textarea>
     </div>
-    <div class="modal-footer">
-      <button id="fbCancel" class="btn secondary" style="width:100px">Cancel</button>
-      <button id="fbOk" class="btn" style="width:100px">OK</button>
+    <div class="foot">
+      <button class="btn ghost" id="fbCancel">Cancel</button>
+      <button class="btn" id="fbOK">OK</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ==========================================================
-   STATIC DATA for POC
-   ========================================================== */
-const USERS = [
-  { loginuser:"User1", alias:"akanoo", name:"User Display" },
-  { loginuser:"User1", alias:"alexr",  name:"User Display" },
-  { loginuser:"User1", alias:"chenl",  name:"User Display" },
-  { loginuser:"User1", alias:"dev_1",  name:"User Display" },
-  { loginuser:"User3", alias:"isham",  name:"User Display" },
-  { loginuser:"User1", alias:"jdoe",   name:"User Display" },
-  { loginuser:"User2", alias:"katew",  name:"User Display" },
-  { loginuser:"User3", alias:"liamj",  name:"User Display" },
-  { loginuser:"User1", alias:"mshah",  name:"User Display" },
-  { loginuser:"User2", alias:"ninad",  name:"User Display" },
-  { loginuser:"User2", alias:"olgap",  name:"User Display" },
-  { loginuser:"User2", alias:"omarh",  name:"User Display" },
-  { loginuser:"User1", alias:"pk",     name:"User Display" },
-  { loginuser:"User4", alias:"ravin",  name:"User Display" },
-  { loginuser:"User4", alias:"riak",   name:"User Display" },
-  { loginuser:"User4", alias:"dev_1",  name:"User Display" },
-  { loginuser:"User4", alias:"zedx",   name:"User Display" }
-];
-// show combined User1 + User3 as requested:
-const ALLOWED_LOGIN = new Set(["User1","User3","All"]);
-const CURRENT_LOGIN = "User1"; // for POC; in prod, inject logged-in user
+/* ------------------ STATIC DATA (POC) ------------------ */
+const allUsers = [
+  { alias:"akanoo", name:"User Display" }, { alias:"alexr", name:"User Display" },
+  { alias:"chenl",  name:"User Display" }, { alias:"dev_1", name:"User Display" },
+  { alias:"isham",  name:"User Display" }, { alias:"jdoe",  name:"User Display" },
+  { alias:"katew",  name:"User Display" }, { alias:"liamj", name:"User Display" },
+  { alias:"mshah",  name:"User Display" }, { alias:"ninad", name:"User Display" },
+  { alias:"olgap",  name:"User Display" }, { alias:"omarh", name:"User Display" },
+  { alias:"pk",     name:"User Display" }, { alias:"ravin", name:"User Display" },
+  { alias:"sarab",  name:"User Display" }, { alias:"timq",  name:"User Display" },
+  { alias:"vikz",   name:"User Display" }, { alias:"zedx",  name:"User Display" }
+].sort((a,b)=>a.alias.localeCompare(b.alias));
 
-/* ==========================================================
-   DOM
-   ========================================================== */
-const screen1 = document.getElementById("screen1");
-const screen2 = document.getElementById("screen2");
-const screen3 = document.getElementById("screen3");
+/* ------------------ DOM HOOKS ------------------ */
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+const btnBack = document.getElementById('btnBack');
+const btnClose = document.getElementById('btnClose');
 
-const toScreen2 = document.getElementById("toScreen2");
-const s1Back = document.getElementById("s1Back");    // kept
-const s2Back = document.getElementById("s2Back");
-const s3Back = document.getElementById("s3Back");
+const markAgreement = document.getElementById('markAgreement');
+const markTraining = document.getElementById('markTraining');
+const step1Err = document.getElementById('step1Err');
+const toStep2 = document.getElementById('toStep2');
 
-const usersTbody = document.getElementById("usersTbody");
-const chips = document.getElementById("chips");
+const rows = document.getElementById('rows');
+const chips = document.getElementById('chips');
+const searchBox = document.getElementById('searchBox');
+const btnClear = document.getElementById('btnClear');
+const nextFromStep2 = document.getElementById('nextFromStep2');
+const dt = document.getElementById('dt');
+const dtErr = document.getElementById('dtErr');
 
-const durationInput = document.getElementById("durationDate");
-const durationErr   = document.getElementById("durationError");
-const nextBtn       = document.getElementById("nextBtn");
-const clearBtn      = document.getElementById("clearBtn");
+const newTitle = document.getElementById('newTitle');
+const bz = document.getElementById('bz');
+const bzErr = document.getElementById('bzErr');
+const btnSubmit = document.getElementById('btnSubmit');
 
-const searchBox     = document.getElementById("searchBox");
-const searchBtn     = document.getElementById("searchBtn");
+const confirm = document.getElementById('confirm');
+const confirmText = document.getElementById('confirmText');
+const cCancel = document.getElementById('cCancel');
+const cOK = document.getElementById('cOK');
 
-const justText  = document.getElementById("justText");
-const justError = document.getElementById("justError");
-const submitBtn = document.getElementById("submitBtn");
+const feedback = document.getElementById('feedback');
+const fb = document.getElementById('fb');
+const fbCancel = document.getElementById('fbCancel');
+const fbOK = document.getElementById('fbOK');
 
-/* ==========================================================
-   Helpers (screens + modals)
-   ========================================================== */
-function show(el){ el.classList.add("active"); }
-function hide(el){ el.classList.remove("active"); }
+/* ------------------ NAV ------------------ */
+let current = 1;
+function show(step){
+  step1.style.display = step===1?'block':'none';
+  step2.style.display = step===2?'block':'none';
+  step3.style.display = step===3?'block':'none';
+  current = step;
+}
+btnBack.onclick = () => {
+  if(current>1) show(current-1);
+  else notifyParentClose();
+};
+btnClose.onclick = () => notifyParentClose();
 
-const confirmModal = document.getElementById("confirmModal");
-const confirmSummary = document.getElementById("confirmSummary");
-const confirmOkBtn = document.getElementById("confirmOkBtn");
-const confirmCancelBtn = document.getElementById("confirmCancelBtn");
-
-const fbModal = document.getElementById("fbModal");
-const fbOk = document.getElementById("fbOk");
-const fbCancel = document.getElementById("fbCancel");
-
-function openModal(el){ el.classList.add("open"); }
-function closeModal(el){ el.classList.remove("open"); }
-
-/* ==========================================================
-   State
-   ========================================================== */
-let selected = new Set();  // of aliases
-
-/* ==========================================================
-   Renderers
-   ========================================================== */
-function renderUsers(list){
-  list.sort((a,b)=>a.alias.localeCompare(b.alias));
-  const rows = list.map(u=>{
-    const disabled = selected.has(u.alias) ? "disabled" : "";
-    return `<tr class="user-row">
-      <td>${u.alias}</td>
-      <td>${u.name}</td>
-      <td><button class="btn addBtn" data-alias="${u.alias}" ${disabled}>Add</button></td>
-    </tr>`;
-  }).join("");
-  usersTbody.innerHTML = rows;
-
-  // wire add
-  usersTbody.querySelectorAll(".addBtn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const a = btn.dataset.alias;
-      selected.add(a);
-      btn.disabled = true;              // hide/disable after add (requirement)
-      paintChips();
-    });
-  });
+/* Teams/Agent close (task module) */
+function notifyParentClose(payload){
+  // parent postMessage (Teams/Agent)
+  try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
 }
 
-function paintChips(){
-  if(selected.size===0){ chips.innerHTML=""; return; }
-  const arr = Array.from(selected).sort((a,b)=>a.localeCompare(b));
-  chips.innerHTML = arr.map(a=>(
-    `<span class="chip">${a}<span class="x" data-alias="${a}" title="Remove">×</span></span>`
-  )).join("");
+/* ------------------ STEP 1: Pre-req ------------------ */
+let prAgreement = true; // preset completed for demo copy
+let prTraining  = true;
 
-  chips.querySelectorAll(".x").forEach(x=>{
-    x.addEventListener("click", ()=>{
-      const a = x.dataset.alias;
-      selected.delete(a);
-
-      // re-enable its “Add” button
-      const btn = usersTbody.querySelector(`.addBtn[data-alias="${a}"]`);
-      if(btn) btn.disabled = false;
-      paintChips();
-    });
-  });
+function evalStep1(){
+  step1Err.style.display = 'none';
+  toStep2.disabled = !(prAgreement && prTraining);
 }
+markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
+markTraining.onclick  = ()=>{ prTraining  = true; evalStep1(); };
+evalStep1();
 
-/* ==========================================================
-   Load initial list (User1 + User3 for POC)
-   ========================================================== */
-function allowed(u){
-  return ALLOWED_LOGIN.has("All") || ALLOWED_LOGIN.has(u.loginuser);
-}
-renderUsers(USERS.filter(allowed));
+toStep2.onclick = ()=> show(2);
 
-/* ==========================================================
-   Search (no type-ahead; click button → filter)
-   ========================================================== */
-searchBtn.addEventListener("click", ()=>{
-  const q = (searchBox.value||"").trim().toLowerCase();
-  const list = USERS.filter(u=>allowed(u) && (u.alias.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)));
-  renderUsers(list);
-});
+/* ------------------ STEP 2: Users + Duration ------------------ */
+let selected = new Set();
 
-/* ==========================================================
-   Duration validation (uniform message)
-   ========================================================== */
-const FY_MSG = "The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).";
-
-function validateFiscalDate(iso){
-  if(!iso) return {ok:false,msg:FY_MSG};
-  const today = new Date();
-  const typed = new Date(iso+"T00:00:00");
-
-  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  if(typed <= todayOnly) return {ok:false,msg:FY_MSG};
-
-  // Current FY window: Jul 25 – Jun 26
-  const fyStartYear = (today.getMonth()>6 || (today.getMonth()===6 && today.getDate()>=25))
-    ? today.getFullYear()
-    : today.getFullYear() - 1;
-  const fyStart = new Date(fyStartYear, 6, 25);
-  const fyEnd   = new Date(fyStartYear + 1, 5, 26);
-
-  if(typed < fyStart || typed > fyEnd) return {ok:false,msg:FY_MSG};
-  return {ok:true};
-}
-
-function refreshDateValidity(){
-  const res = validateFiscalDate(durationInput.value);
-  if(!res.ok){ durationErr.textContent=res.msg; durationErr.style.display="block"; nextBtn.disabled=true; }
-  else{ durationErr.textContent=""; durationErr.style.display="none"; nextBtn.disabled=false; }
-}
-
-// IST today used when clearing (as requested)
-function setTodayIST(){
+/* IST helpers and FY validation */
+function nowIST(){
   const now = new Date();
-  // convert to IST date string yyyy-mm-dd
-  const utc = now.getTime() + (now.getTimezoneOffset()*60000);
-  const ist = new Date(utc + 5.5*3600000);
-  const y = ist.getFullYear();
-  const m = String(ist.getMonth()+1).padStart(2,"0");
-  const d = String(ist.getDate()).padStart(2,"0");
-  return `${y}-${m}-${d}`;
+  const istOffsetMin = 330; // +05:30
+  return new Date(now.getTime() + (istOffsetMin - now.getTimezoneOffset())*60000);
 }
-durationInput.addEventListener("input", refreshDateValidity);
-durationInput.addEventListener("change", refreshDateValidity);
-
-// CLEAR → set to today's date (which intentionally disables Next until changed)
-clearBtn.addEventListener("click", ()=>{
-  durationInput.value = setTodayIST();
-  refreshDateValidity();
-});
-
-// initialize date to today (disabled Next)
-durationInput.value = setTodayIST();
-refreshDateValidity();
-
-/* ==========================================================
-   Navigation (screens)
-   ========================================================== */
-toScreen2.addEventListener("click", ()=>{
-  // In prod: gate with backend flags for agreement / training
-  hide(screen1); show(screen2);
-});
-s1Back.addEventListener("click", ()=>{ /* keep as no-op for now */ });
-s2Back.addEventListener("click", ()=>{ hide(screen2); show(screen1); });
-s3Back.addEventListener("click", ()=>{ hide(screen3); show(screen2); });
-
-/* ==========================================================
-   NEXT (Screen 2) → confirm dialog (centered)
-   ========================================================== */
-nextBtn.addEventListener("click", (e)=>{
-  e.preventDefault();
-  const res = validateFiscalDate(durationInput.value);
-  if(!res.ok){ refreshDateValidity(); return; }
-  if(selected.size===0){ alert("Select at least one user."); return; }
-
-  const arr = Array.from(selected).sort((a,b)=>a.localeCompare(b));
-  confirmSummary.innerHTML =
-    `<div><strong>Duration:</strong> ${durationInput.value}</div>
-     <div style="margin-top:8px"><strong>Users:</strong></div>
-     <ul class="confirm-list">${arr.map(a=>`<li>${a}</li>`).join("")}</ul>`;
-  openModal(confirmModal);
-});
-confirmCancelBtn.addEventListener("click", ()=>closeModal(confirmModal));
-confirmOkBtn.addEventListener("click", ()=>{
-  closeModal(confirmModal);
-  hide(screen2); show(screen3);
-});
-
-/* ==========================================================
-   Submit (Screen 3) → validate inline, then feedback modal
-   ========================================================== */
-submitBtn.addEventListener("click", ()=>{
-  const txt = (justText.value||"").trim();
-  if(!txt){
-    justError.style.display="block"; justText.focus(); return;
+function dateFromInputIST(str){
+  // build IST midnight so comparisons are consistent
+  return new Date(str + "T00:00:00+05:30");
+}
+function fyWindowFor(todayIST){
+  const y = todayIST.getFullYear();
+  const m = todayIST.getMonth()+1; // 1..12
+  const d = todayIST.getDate();
+  // FY is Jul 25 -> Jun 26
+  const jul25This  = new Date(`${y}-07-25T00:00:00+05:30`);
+  const jun26Next  = new Date(`${y+1}-06-26T23:59:59+05:30`);
+  const jul25Prev  = new Date(`${y-1}-07-25T00:00:00+05:30`);
+  const jun26This  = new Date(`${y}-06-26T23:59:59+05:30`);
+  // If today >= Jul 25 (this year), FY is [Jul25 this year .. Jun26 next year]
+  if(todayIST >= jul25This) return {start: jul25This, end: jun26Next};
+  // else: FY is [Jul25 previous year .. Jun26 this year]
+  return {start: jul25Prev, end: jun26This};
+}
+function validateDuration(){
+  const val = dt.value;
+  const today = nowIST();
+  const {start,end} = fyWindowFor(today);
+  let ok = false, msg="";
+  if(!val){
+    msg = "Please select a date.";
+  }else{
+    const chosen = dateFromInputIST(val);
+    const isAfterToday = chosen > new Date(today.toDateString()); // strictly after today
+    const inFY = (chosen>=start && chosen<=end);
+    ok = isAfterToday && inFY;
+    if(!ok){
+      msg = "The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).";
+    }
   }
-  justError.style.display="none";
+  dtErr.textContent = msg;
+  dtErr.style.display = ok ? "none" : "block";
+  nextFromStep2.disabled = !(ok && selected.size>0);
+  return ok;
+}
 
-  // In PROD: call Power Automate / API here to save final request
-  // ----------------------------------------------
-  // Example payload:
-  // const payload = {
-  //   loginUser: CURRENT_LOGIN,
-  //   duration: durationInput.value,
-  //   aliases: Array.from(selected),
-  //   newTitle: document.getElementById("newTitle").value,
-  //   businessJustification: txt
-  // };
-  // TODO: POST payload to Azure Function / Logic App
-  // ----------------------------------------------
+/* initial date = today (IST) to make Clear reset predictable */
+(function presetDateToToday(){
+  const t = nowIST();
+  const yyyy = t.getFullYear();
+  const mm = String(t.getMonth()+1).padStart(2,'0');
+  const dd = String(t.getDate()).padStart(2,'0');
+  dt.value = `${yyyy}-${mm}-${dd}`;
+  validateDuration();
+})();
 
-  openModal(fbModal);
-});
-fbCancel.addEventListener("click", ()=>{ closeModal(fbModal); /* do nothing else */ });
-fbOk.addEventListener("click", ()=>{
-  // In PROD: send feedbackText.value to backend (optional)
-  closeModal(fbModal);
+dt.addEventListener('change', validateDuration);
 
-  // Close task module (Teams) — for POC we simply reload/close
-  // if (microsoftTeams) microsoftTeams.tasks.submitTask({status:'ok'});
-  window.close(); // harmless if in browser tab
-});
+/* build table */
+function renderRows(){
+  const q = searchBox.value.trim().toLowerCase();
+  const frag = document.createDocumentFragment();
+  allUsers.forEach(u=>{
+    if(q && !(u.alias.toLowerCase().includes(q) || u.name.toLowerCase().includes(q))) return;
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td'); td1.textContent = u.alias;
+    const td2 = document.createElement('td'); td2.textContent = u.name;
+    const td3 = document.createElement('td'); td3.style.textAlign='right';
+    const b = document.createElement('button');
+    b.className='btn'; b.textContent = selected.has(u.alias)?'Added':'Add';
+    b.disabled = selected.has(u.alias);
+    b.onclick = ()=>{ selected.add(u.alias); renderChips(); renderRows(); validateDuration(); };
+    td3.appendChild(b);
+    tr.append(td1,td2,td3);
+    frag.appendChild(tr);
+  });
+  rows.replaceChildren(frag);
+}
+function renderChips(){
+  const frag = document.createDocumentFragment();
+  Array.from(selected).sort().forEach(a=>{
+    const pill = document.createElement('span'); pill.className='pill';
+    pill.innerHTML = `<span>${a}</span><span class="x" title="Remove">&times;</span>`;
+    pill.querySelector('.x').onclick = ()=>{ selected.delete(a); renderChips(); renderRows(); validateDuration(); };
+    frag.appendChild(pill);
+  });
+  chips.replaceChildren(frag);
+}
+renderRows();
+
+searchBox.addEventListener('input', ()=> renderRows());
+btnClear.onclick = ()=>{
+  searchBox.value='';
+  selected.clear();
+  // set date back to "today" (IST), as requested
+  const t = nowIST();
+  const yyyy = t.getFullYear(), mm=String(t.getMonth()+1).padStart(2,'0'), dd=String(t.getDate()).padStart(2,'0');
+  dt.value = `${yyyy}-${mm}-${dd}`;
+  renderChips(); renderRows(); validateDuration();
+}
+
+/* next -> confirmation modal */
+nextFromStep2.onclick = ()=>{
+  if(!validateDuration() || selected.size===0) return;
+  const when = dt.value.split('-').reverse().join('/'); // dd/mm/yyyy
+  const list = Array.from(selected).sort().map(a=>`<li>${a}</li>`).join('');
+  confirmText.innerHTML = `<div>Following users are selected for <strong>${when}</strong>:</div><ul>${list}</ul>`;
+  confirm.style.display='flex';
+};
+cCancel.onclick = ()=> confirm.style.display='none';
+cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
+
+/* ------------------ STEP 3: Title & BZ ------------------ */
+function validateBZ(){
+  const ok = bz.value.trim().length>0;
+  bzErr.style.display = ok?'none':'block';
+  return ok;
+}
+bz.addEventListener('input', validateBZ);
+
+btnSubmit.onclick = ()=>{
+  if(!validateBZ()) return;
+
+  /* ----- CALL API TO CREATE REQUEST -----
+     Replace with your Power Automate (HTTP Request) or API call.
+     Sample shape:
+     const payload = {
+       date: dt.value,
+       users: Array.from(selected),
+       newTitle: newTitle.value,
+       justification: bz.value.trim()
+     };
+     fetch('<<YOUR_API_URL>>', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) })
+       .then(r=>r.json())
+       .then(data => { // success
+         // optionally pass summary back to the agent
+         notifyParentClose({ result:'ok', summary: payload });
+       });
+  --------------------------------------- */
+
+  // POC flow: show centered, compact feedback modal; on OK close the TM.
+  feedback.style.display='flex';
+};
+
+/* FEEDBACK */
+fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
+fbOK.onclick = ()=>{
+  /* ----- CALL API TO STORE FEEDBACK (optional) -----
+     fetch('<<FEEDBACK_API>>',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:fb.value})})
+  --------------------------------------------------- */
+  feedback.style.display='none';
+  notifyParentClose({result:'ok', feedback: fb.value});
+};
+
+/* ------------- OPTIONAL: pull data on load --------------
+   If you want to pre-populate items from your backend, you can call it here.
+   Example:
+   fetch('<<RETRIEVE_USERS_FOR_LOGIN_USER>>').then(r=>r.json()).then(list => { ... });
+---------------------------------------------------------- */
 </script>
-
 </body>
 </html>
