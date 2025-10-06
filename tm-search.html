@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>9Request Actual Access — Task Module</title>
+<title>8Request Actual Access — Task Module</title>
 <style>
   :root{
     --brand:#0e5a73;           /* teal */
@@ -14,8 +14,9 @@
     --card:#ffffff;
     --danger:#b91c1c;
     --ok:#065f46;
-    --row-h:32px;
+    --row-h:28px;              /* tighter rows (was 32) */
     --radius:10px;
+    --btnw:96px;               /* consistent button width */
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
   .shell{max-width:1100px;margin:24px auto;padding:0 16px;}
@@ -24,25 +25,26 @@
   .hdr h1{font-size:20px;margin:0}
   .bar{display:flex;justify-content:space-between;align-items:center;margin:8px 0 16px}
   .bar-right{display:flex;align-items:center;gap:12px}
-  .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
+  .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer;min-width:var(--btnw);text-align:center}
   .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn:hover{background:var(--brand-dark)}
   .row{display:flex;gap:16px;align-items:center;margin:6px 0}
   .row > *{flex:1}
+  .grid-2{display:grid;grid-template-columns:1fr 420px;gap:16px;align-items:start}
   label{font-weight:700}
   .req::after{content:" *"; color:var(--danger); font-weight:800}
   input[type="date"],input[type="text"],textarea,select{
     width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
   }
   input.invalid{border-color:var(--danger)}
-  textarea{min-height:110px; resize:vertical}
+  textarea{min-height:140px; resize:vertical}
   .muted{color:var(--muted);font-size:12px}
   .help{font-size:12px; margin-top:6px; color:var(--muted)}
   .help.error{color:var(--danger)}
   .ok{color:var(--ok);font-weight:700}
   .err{color:var(--danger)}
   .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
-  .list th, .list td{padding:6px 10px; border-bottom:1px solid #eef2f7}
+  .list th, .list td{padding:4px 8px; border-bottom:1px solid #eef2f7} /* tighter padding */
   .list tr{height:var(--row-h)}
   .list th{background:#f1f5f9;text-align:left;font-size:14px}
   .pill{display:inline-flex;gap:8px;align-items:center;background:#eef6fb;border:1px solid #cfe3ee;color:#083344;padding:4px 10px;border-radius:999px;margin:4px 6px 0 0}
@@ -55,8 +57,7 @@
   .modal .panel{background:#fff;width:min(680px,96vw);border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2)}
   .modal .head{padding:12px 16px;border-bottom:1px solid #eef2f7;font-weight:700}
   .modal .body{padding:16px}
-  .modal .foot{padding:14px 16px;border-top:1px solid #eef2f7;display:flex;gap:10px;justify-content:flex-end}
-  .center-actions{display:flex;gap:10px}
+  .modal .foot{padding:14px 16px;border-top:1px solid #eef2f7;display:flex;gap:10px;justify-content:flex-end} /* right aligned */
 </style>
 </head>
 <body>
@@ -137,31 +138,31 @@
   <section class="card" id="step3" style="display:none">
     <div class="hdr"><h1>Title & Business Justification</h1></div>
 
-    <div class="row" style="align-items:flex-end">
+    <!-- Row 1: current title (left) and new title (right) -->
+    <div class="grid-2" style="margin-bottom:8px">
       <div>
         <label>Current title</label>
         <div class="pill" title="from HR system">Soft-Architect-Service</div>
       </div>
-      <div></div>
-      <div style="max-width:420px">
+      <div>
         <label>Your new title</label>
         <select id="newTitle">
           <option>Architect</option>
-          <option>Senior Architect</option>
+          <option selected>Senior Architect</option>
           <option>Principal Engineer</option>
           <option>Staff Engineer</option>
         </select>
       </div>
-    </div>
 
-    <div class="row" style="align-items:flex-start">
-      <div style="max-width:640px">
+      <!-- Row 2: Business Justification spans left column only, right edge aligns with dropdown -->
+      <div>
         <label class="req">Business Justification</label>
         <textarea id="bz"></textarea>
         <div id="bzErr" class="err" style="display:none">Business justification is required.</div>
       </div>
-      <div style="flex:1"></div>
-      <div style="flex:0 0 180px;align-self:flex-end;text-align:right">
+
+      <!-- Row 2 (right column): Submit button, right-aligned -->
+      <div style="text-align:right;align-self:end">
         <button class="btn" id="btnSubmit">Submit</button>
       </div>
     </div>
@@ -175,7 +176,7 @@
     <div class="body"><div id="confirmText"></div></div>
     <div class="foot">
       <button class="btn" id="cCancel">Cancel</button>
-      <button class="btn" id="cOK">Confirm</button>
+      <button class="btn" id="cOK">OK</button>
     </div>
   </div>
 </div>
@@ -197,7 +198,6 @@
 
 <script>
 /* =================== STATIC DATA (POC) =================== */
-/* Realistic display names so the table shows actual names. */
 const allUsers = [
   { alias:"akanoo", displayName:"A. Kanoo" },
   { alias:"alexr",  displayName:"Alex Ritchie" },
@@ -266,7 +266,7 @@ function show(step){
   btnBack.classList.toggle('hide', current===1);
   refreshTopNext();
 }
-btnBack.onclick = ()=> show(1);
+btnBack.onclick = ()=> show(current>1 ? current-1 : 1);   // from Screen-3 -> Screen-2
 btnClose.onclick = ()=> notifyParentClose();
 function notifyParentClose(payload){
   try{ window.parent.postMessage({ type:"tm.close", payload }, "*"); }catch(e){}
@@ -286,7 +286,7 @@ markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
 markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
 
-/* =================== IST + FY HELPERS (STRING-SAFE) =================== */
+/* =================== IST + FY HELPERS =================== */
 function todayISTYMD(){
   return new Intl.DateTimeFormat('en-CA',{ timeZone:'Asia/Kolkata', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
 }
@@ -317,18 +317,15 @@ function validateDuration(){
   return ok;
 }
 function step1Ready(){ return prAgreement && prTraining; }
-function step2Ready(){
-  const hasUsers = selected.size > 0;
-  const dateOk   = validateDuration();
-  return hasUsers && dateOk;
-}
+function step2Ready(){ return selected.size>0 && validateDuration(); }
+
 function refreshTopNext(){
-  if(current===1)       btnTopNext.disabled = !step1Ready();
-  else if(current===2)  btnTopNext.disabled = !step2Ready();
-  else                  btnTopNext.disabled = true;
+  if(current===1)      btnTopNext.disabled = !step1Ready();
+  else if(current===2) btnTopNext.disabled = !step2Ready();
+  else                 btnTopNext.disabled = true;
 }
 
-/* Set default date = IST today (e.g., 2025-10-06) */
+/* Set default date = IST today */
 (function presetDateToToday(){
   dt.value = todayISTYMD();
   validateDuration();
@@ -374,7 +371,7 @@ btnClear.onclick = ()=>{ searchBox.value=''; selected.clear(); renderChips(); re
 /* Top-right NEXT across steps */
 btnTopNext.onclick = ()=>{
   if(current===1 && step1Ready()){
-    show(2);                                 // move to Screen-2
+    show(2);  // Screen-2
     return;
   }
   if(current===2 && step2Ready()){
@@ -430,15 +427,6 @@ fbOK.onclick = ()=>{
   feedback.style.display='none';
   notifyParentClose({result:'ok', feedback: fb.value});
 };
-
-/* ----- PULL: preload data if needed -----
-   Example:
-   fetch('<<RETRIEVE_USERS_FOR_LOGIN_USER>>')
-     .then(r=>r.json())
-     .then(list => {
-        // hydrate allUsers / preselect users, etc.
-     });
-------------------------------------------------- */
 </script>
 </body>
 </html>
