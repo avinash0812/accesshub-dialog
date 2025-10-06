@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Request Actual Access — 2Task Module</title>
+<title>3Request 2Actual Access — Task Module</title>
 <style>
   :root{
     --brand:#0e5a73;           /* buttons/links */
@@ -14,7 +14,7 @@
     --card:#ffffff;
     --danger:#b91c1c;
     --ok:#065f46;
-    --row-h:38px;              /* tighter rows */
+    --row-h:32px;              /* tighter rows */
     --radius:10px;
   }
   html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
@@ -23,23 +23,26 @@
   .hdr{display:flex;align-items:center;gap:12px;margin:0 0 14px 0}
   .hdr h1{font-size:20px;margin:0}
   .bar{display:flex;justify-content:space-between;align-items:center;margin:8px 0 16px}
+  .bar-right{display:flex;align-items:center;gap:12px}
   .btn{appearance:none;border:0;background:var(--brand);color:#fff;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn.secondary{background:#e5eef2;color:var(--brand);font-weight:700}
   .btn.ghost{background:#ffffff;border:1px solid #cbd5e1;color:var(--fg)}
   .btn.flat{background:transparent;color:var(--brand);padding:6px 10px}
   .btn:hover{background:var(--brand-dark)}
-  .btn.secondary:hover{background:#d6e5ec}
-  .btn.ghost:hover{background:#f1f5f9}
-  .row{display:flex;gap:16px;align-items:center;margin:8px 0}
+  .btn.flat:hover{background:transparent}
+  .row{display:flex;gap:16px;align-items:center;margin:6px 0}
   .row > *{flex:1}
   label{font-weight:700}
   .req::after{content:" *"; color:var(--danger); font-weight:800}
   input[type="date"],input[type="text"],textarea,select{
-    width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
+    width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff;
   }
+  input.invalid{border-color:var(--danger)}
   textarea{min-height:110px; resize:vertical}
   .muted{color:var(--muted);font-size:12px}
+  .help{font-size:12px; margin-top:6px; color:var(--muted)}
+  .help.error{color:var(--danger)}
   .err{color:var(--danger);font-weight:600;margin-top:6px}
   .ok{color:var(--ok);font-weight:700}
   .list{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden}
@@ -63,11 +66,13 @@
 <div class="shell">
   <div class="bar">
     <div class="center-actions">
-      <!-- CHANGED: Back uses 'secondary' to match your background scheme -->
-      <button class="btn secondary" id="btnBack">&larr; Back</button>
+      <!-- Back removed as requested -->
       <button class="btn flat" id="btnClose">Close</button>
     </div>
-    <strong>Request Actual Access</strong>
+    <div class="bar-right">
+      <strong>Request Actual Access</strong>
+      <button class="btn" id="btnTopNext" disabled>Next</button>
+    </div>
   </div>
 
   <!-- STEP 1: PRE-REQ -->
@@ -77,7 +82,6 @@
     <div class="space"></div>
     <div class="row">
       <div style="flex:0 0 180px;"><label class="req">Agreement</label></div>
-      <!-- CHANGED: default shows NOT signed (red) -->
       <div><span id="agreementState" class="err">Agreement is not signed.</span></div>
       <div style="flex:0 0 200px;text-align:right">
         <button class="btn secondary" id="markAgreement">Mark completed</button>
@@ -85,29 +89,19 @@
     </div>
     <div class="row">
       <div style="flex:0 0 180px;"><label class="req">Training</label></div>
-      <!-- CHANGED: default shows NOT completed (red) -->
       <div><span id="trainingState" class="err">Training is not completed</span></div>
       <div style="flex:0 0 200px;text-align:right">
         <button class="btn secondary" id="markTraining">Mark completed</button>
       </div>
     </div>
     <div id="step1Err" class="err" style="display:none"></div>
-    <div class="space"></div>
-    <div style="text-align:right">
-      <button class="btn" id="toStep2" disabled>Next</button>
-    </div>
   </section>
 
   <!-- STEP 2: USERS + DURATION -->
   <section class="card" id="step2" style="display:none">
     <div class="hdr"><h1>Access Details</h1></div>
 
-    <div class="row">
-      <div>
-        <label>Description</label>
-        <input type="text" value="asdasdasdas." aria-label="desc" />
-      </div>
-    </div>
+    <!-- Description row removed -->
 
     <div class="row">
       <div>
@@ -129,15 +123,12 @@
       <div style="max-width:320px">
         <label class="req">Enter Duration</label>
         <input type="date" id="dt" />
-        <div id="dtErr" class="err" style="display:none"></div>
-        <div class="muted" id="dtNote">
+        <!-- single small line; grey when ok, red when error -->
+        <div id="dtHelp" class="help">
           The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).
         </div>
       </div>
       <div style="flex:1"></div>
-      <div style="flex:0 0 180px;align-self:flex-end;text-align:right">
-        <button class="btn" id="nextFromStep2" disabled>Next</button>
-      </div>
     </div>
 
     <div class="space"></div>
@@ -229,23 +220,22 @@ const allUsers = [
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
-const btnBack = document.getElementById('btnBack');
+
 const btnClose = document.getElementById('btnClose');
+const btnTopNext = document.getElementById('btnTopNext');
 
 const markAgreement = document.getElementById('markAgreement');
 const markTraining = document.getElementById('markTraining');
 const agreementState = document.getElementById('agreementState');
 const trainingState  = document.getElementById('trainingState');
 const step1Err = document.getElementById('step1Err');
-const toStep2 = document.getElementById('toStep2');
 
 const rows = document.getElementById('rows');
 const chips = document.getElementById('chips');
 const searchBox = document.getElementById('searchBox');
 const btnClear = document.getElementById('btnClear');
-const nextFromStep2 = document.getElementById('nextFromStep2');
 const dt = document.getElementById('dt');
-const dtErr = document.getElementById('dtErr');
+const dtHelp = document.getElementById('dtHelp');
 
 const newTitle = document.getElementById('newTitle');
 const bz = document.getElementById('bz');
@@ -269,11 +259,8 @@ function show(step){
   step2.style.display = step===2?'block':'none';
   step3.style.display = step===3?'block':'none';
   current = step;
+  refreshTopNext();
 }
-btnBack.onclick = () => {
-  if(current>1) show(current-1);
-  else notifyParentClose();
-};
 btnClose.onclick = () => notifyParentClose();
 
 /* Teams/Agent close (task module) */
@@ -282,47 +269,35 @@ function notifyParentClose(payload){
 }
 
 /* =================== STEP 1: Pre-req =================== */
-/* CHANGED: defaults are NOT completed */
 let prAgreement = false;
 let prTraining  = false;
 
 function evalStep1(){
-  step1Err.style.display = 'none';
-
-  // Update Agreement text + colors + button
+  // Agreement
   if(prAgreement){
     agreementState.textContent = 'Agreement signed.';
-    agreementState.classList.remove('err');
-    agreementState.classList.add('ok');
+    agreementState.classList.remove('err'); agreementState.classList.add('ok');
     markAgreement.disabled = true;
   }else{
     agreementState.textContent = 'Agreement is not signed.';
-    agreementState.classList.remove('ok');
-    agreementState.classList.add('err');
+    agreementState.classList.remove('ok'); agreementState.classList.add('err');
     markAgreement.disabled = false;
   }
-
-  // Update Training text + colors + button
+  // Training
   if(prTraining){
     trainingState.textContent = 'Training completed';
-    trainingState.classList.remove('err');
-    trainingState.classList.add('ok');
+    trainingState.classList.remove('err'); trainingState.classList.add('ok');
     markTraining.disabled = true;
   }else{
     trainingState.textContent = 'Training is not completed';
-    trainingState.classList.remove('ok');
-    trainingState.classList.add('err');
+    trainingState.classList.remove('ok'); trainingState.classList.add('err');
     markTraining.disabled = false;
   }
-
-  // Next enabled only when both are completed
-  toStep2.disabled = !(prAgreement && prTraining);
+  refreshTopNext();
 }
 markAgreement.onclick = ()=>{ prAgreement = true; evalStep1(); };
 markTraining .onclick = ()=>{ prTraining  = true; evalStep1(); };
 evalStep1();
-
-toStep2.onclick = ()=> show(2);
 
 /* =================== STEP 2: Users + Duration =================== */
 let selected = new Set();
@@ -345,39 +320,40 @@ function fyWindowFor(todayIST){
   return (todayIST >= jul25This) ? {start: jul25This, end: jun26Next}
                                  : {start: jul25Prev, end: jun26This};
 }
+
 function validateDuration(){
   const val = dt.value;
   const today = nowIST();
   const {start,end} = fyWindowFor(today);
-  let ok = false, msg="";
-  if(!val){
-    msg = "Please select a date.";
-  }else{
+  let ok = false;
+  if(val){
     const chosen = dateFromInputIST(val);
     const isAfterToday = chosen > new Date(today.toDateString()); // strictly after today
     const inFY = (chosen>=start && chosen<=end);
     ok = isAfterToday && inFY;
-    if(!ok){
-      msg = "The date can not be today, before today or later than the current fiscal year (Fiscal year is – July 25 to Jun 26).";
-    }
   }
-  dtErr.textContent = msg;
-  dtErr.style.display = ok ? "none" : "block";
-  nextFromStep2.disabled = !(ok && selected.size>0);
+  // style + help text (single line)
+  dt.classList.toggle('invalid', !ok);
+  dtHelp.classList.toggle('error', !ok);
+  // enablement among other requirements
+  refreshTopNext();
   return ok;
 }
-/* preset date = today (IST) */
+
+/* preset date = today (IST) — display 2025-10-06 given 6 Oct 2025 21:17 IST */
 (function presetDateToToday(){
-  const t = nowIST();
+  const t = nowIST();                  // IST "now"
   const yyyy = t.getFullYear();
   const mm = String(t.getMonth()+1).padStart(2,'0');
   const dd = String(t.getDate()).padStart(2,'0');
-  dt.value = `${yyyy}-${mm}-${dd}`;
-  validateDuration();
+  dt.value = `${yyyy}-${mm}-${dd}`;    // shows today's date per IST
+  validateDuration();                  // will be invalid until user picks a later date
 })();
+
 dt.addEventListener('change', validateDuration);
 
-/* list rendering (alias sorted, add button disables when selected) */
+/* list rendering */
+const rows = document.getElementById('rows');
 function renderRows(){
   const q = searchBox.value.trim().toLowerCase();
   const frag = document.createDocumentFragment();
@@ -390,7 +366,7 @@ function renderRows(){
     const b = document.createElement('button');
     b.className='btn'; b.textContent = selected.has(u.alias)?'Added':'Add';
     b.disabled = selected.has(u.alias);
-    b.onclick = ()=>{ selected.add(u.alias); renderChips(); renderRows(); validateDuration(); };
+    b.onclick = ()=>{ selected.add(u.alias); renderChips(); renderRows(); refreshTopNext(); };
     td3.appendChild(b);
     tr.append(td1,td2,td3);
     frag.appendChild(tr);
@@ -402,7 +378,7 @@ function renderChips(){
   Array.from(selected).sort().forEach(a=>{
     const pill = document.createElement('span'); pill.className='pill';
     pill.innerHTML = `<span>${a}</span><span class="x" title="Remove">&times;</span>`;
-    pill.querySelector('.x').onclick = ()=>{ selected.delete(a); renderChips(); renderRows(); validateDuration(); };
+    pill.querySelector('.x').onclick = ()=>{ selected.delete(a); renderChips(); renderRows(); refreshTopNext(); };
     frag.appendChild(pill);
   });
   chips.replaceChildren(frag);
@@ -413,22 +389,37 @@ searchBox.addEventListener('input', ()=> renderRows());
 btnClear.onclick = ()=>{
   searchBox.value='';
   selected.clear();
-  const t = nowIST();
-  const yyyy = t.getFullYear(), mm=String(t.getMonth()+1).padStart(2,'0'), dd=String(t.getDate()).padStart(2,'0');
-  dt.value = `${yyyy}-${mm}-${dd}`;
-  renderChips(); renderRows(); validateDuration();
-}
-
-/* Next -> centered confirm */
-nextFromStep2.onclick = ()=>{
-  if(!validateDuration() || selected.size===0) return;
-  const when = dt.value.split('-').reverse().join('/'); // dd/mm/yyyy
-  const list = Array.from(selected).sort().map(a=>`<li>${a}</li>`).join('');
-  confirmText.innerHTML = `<div>Following users are selected for <strong>${when}</strong>:</div><ul>${list}</ul>`;
-  confirm.style.display='flex';
+  renderChips(); renderRows(); refreshTopNext();
 };
-cCancel.onclick = ()=> confirm.style.display='none';
-cOK.onclick = ()=>{ confirm.style.display='none'; show(3); };
+
+/* Top NEXT behavior & enablement across steps */
+function step1Ready(){ return prAgreement && prTraining; }
+function step2Ready(){
+  const hasUsers = selected.size>0;
+  const dateOk = validateDuration();
+  return hasUsers && dateOk;
+}
+function refreshTopNext(){
+  if(current===1){
+    btnTopNext.disabled = !step1Ready();
+  }else if(current===2){
+    btnTopNext.disabled = !step2Ready();
+  }else{
+    btnTopNext.disabled = true; // hidden/unused on step 3
+  }
+}
+btnTopNext.onclick = ()=>{
+  if(current===1 && step1Ready()){
+    show(2);
+  }else if(current===2 && step2Ready()){
+    const when = dt.value.split('-').reverse().join('/'); // dd/mm/yyyy
+    const list = Array.from(selected).sort().map(a=>`<li>${a}</li>`).join('');
+    confirmText.innerHTML = `<div>Following users are selected for <strong>${when}</strong>:</div><ul>${list}</ul>`;
+    confirm.style.display='flex';
+  }
+};
+document.getElementById('cCancel').onclick = ()=> confirm.style.display='none';
+document.getElementById('cOK').onclick = ()=>{ confirm.style.display='none'; show(3); };
 
 /* =================== STEP 3: Title & BZ =================== */
 function validateBZ(){
@@ -440,32 +431,15 @@ bz.addEventListener('input', validateBZ);
 
 btnSubmit.onclick = ()=>{
   if(!validateBZ()) return;
-
-  /* ----- PUSH: create request (Power Automate / API) ----- */
-  // const payload = {
-  //   date: dt.value,
-  //   users: Array.from(selected),
-  //   newTitle: newTitle.value,
-  //   justification: bz.value.trim()
-  // };
-  // fetch('<<YOUR_API_URL>>', {
-  //   method:'POST', headers:{'content-type':'application/json'},
-  //   body: JSON.stringify(payload)
-  // }).then(r=>r.json()).then(() => notifyParentClose({result:'ok', summary:payload}));
-
-  // POC: show compact feedback; on OK close TM.
   feedback.style.display='flex';
 };
 
 /* FEEDBACK */
 fbCancel.onclick = ()=>{ feedback.style.display='none'; notifyParentClose({result:'ok'}); };
 fbOK.onclick = ()=>{
-  // fetch('<<FEEDBACK_API>>',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:fb.value})})
   feedback.style.display='none';
   notifyParentClose({result:'ok', feedback: fb.value});
 };
-
-/* ----- PULL: preload data if needed ----- */
 </script>
 </body>
 </html>
