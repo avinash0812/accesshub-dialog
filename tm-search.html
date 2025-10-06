@@ -15,14 +15,14 @@
   .bar{height:4px;background:var(--brand);border-radius:3px;margin:8px 0 10px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
   .stack{display:grid;gap:14px}
-  .row{display:grid;grid-template-columns:180px 1fr;gap:10px 14px;align-items:center;margin:4px 0}
+  .row{display:grid;grid-template-columns:180px 1fr;gap:10px 14px;align-items:center;margin:2px 0}
   .lbl{font-weight:600}
   .hint{font-size:12px;color:var(--muted)}
   .star{color:var(--danger);margin-left:4px}
   input[type="text"],select,textarea,input[type="date"]{
     width:100%;max-width:520px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;outline:none
   }
-  input[type="date"]{max-width:260px} /* keep inside card */
+  input[type="date"]{max-width:260px}
   input:focus,select:focus,textarea:focus{border-color:var(--brand)}
   textarea{min-height:86px;resize:vertical}
   .btn{appearance:none;border:0;border-radius:10px;padding:10px 18px;font-weight:600;color:#fff;background:var(--brand);cursor:pointer}
@@ -30,6 +30,7 @@
   .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
   .btn[disabled]{opacity:.55;cursor:not-allowed}
   .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+  .actions.l{justify-content:flex-start}
   .pill{display:inline-block;border-radius:999px;background:#ecf5f8;color:#074254;padding:6px 10px;font-weight:600}
   .table{border:1px solid var(--line);border-radius:10px;overflow:hidden}
   table{width:100%;border-collapse:collapse;background:#fff}
@@ -40,6 +41,7 @@
   .chip .x{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);cursor:pointer}
   .warn{color:var(--danger);font-size:12px;margin-top:4px}
   .ok{color:var(--ok);font-size:12px;margin-top:4px}
+
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
   .modal.show{display:flex}
@@ -59,17 +61,17 @@
 
   <!-- Screen 0: PRE-REQUISITES -->
   <section id="sec-prereq" class="card stack">
-    <div class="row"><div class="lbl">Pre-Requisites</div><div class="hint">You must complete both items before continuing.</div></div>
+    <div class="row"><div class="lbl">Pre-Requisites</div><div class="hint">Complete both items before continuing.</div></div>
 
     <div class="row">
       <div class="lbl">Agreement <span class="star">*</span></div>
       <div>
         <span id="agState" class="pill">Pending</span>
-        <div class="actions" style="justify-content:flex-start;gap:8px;margin-top:6px">
+        <div class="actions l" style="gap:8px;margin-top:6px">
           <button class="btn" id="agOpen">Open</button>
           <button class="btn ghost" id="agDone">Mark completed</button>
         </div>
-        <!-- TODO (pull): Set initial Agreement status from your API/flow -->
+        <!-- TODO (pull): Set Agreement from API/Flow -->
       </div>
     </div>
 
@@ -77,11 +79,11 @@
       <div class="lbl">Training <span class="star">*</span></div>
       <div>
         <span id="trState" class="pill">Pending</span>
-        <div class="actions" style="justify-content:flex-start;gap:8px;margin-top:6px">
+        <div class="actions l" style="gap:8px;margin-top:6px">
           <button class="btn" id="trOpen">Open</button>
           <button class="btn ghost" id="trDone">Mark completed</button>
         </div>
-        <!-- TODO (pull): Set initial Training status from your API/flow -->
+        <!-- TODO (pull): Set Training from API/Flow -->
       </div>
     </div>
 
@@ -97,7 +99,7 @@
     <div class="row"><div class="lbl">Show</div><div><select id="ddTop"><option value="10">Top 10</option><option value="20" selected>Top 20</option><option value="50">Top 50</option><option value="-1">All</option></select></div></div>
     <div class="row">
       <div class="lbl">Search alias or name</div>
-      <div class="actions" style="justify-content:flex-start">
+      <div class="actions l">
         <input id="txtQ" type="text" placeholder="Type alias or display name…" />
         <button class="btn" id="btnSearch">Search</button>
         <button class="btn ghost" id="btnClear">Clear</button>
@@ -111,7 +113,7 @@
       <div class="lbl">Enter duration <span class="star">*</span></div>
       <div>
         <input id="dtDuration" type="date" />
-        <div id="dtHint" class="hint">After today and ≤ fiscal year end.</div>
+        <div id="dtHint" class="hint">After today and ≤ fiscal year end (IST).</div>
         <div id="dtError" class="warn" style="display:none"></div>
       </div>
     </div>
@@ -121,6 +123,7 @@
     </div>
 
     <div class="actions">
+      <button class="btn ghost" id="btnBack0">Back</button>
       <button class="btn ghost" id="btnClose1">Close</button>
       <button class="btn" id="btnNext" disabled>Next</button>
     </div>
@@ -136,10 +139,17 @@
         <select id="ddTitles"><option>Architect</option><option>Senior Engineer</option><option>Manager</option><option>Director</option></select>
       </div>
     </div>
-    <div class="row"><div class="lbl">Business justification <span class="star">*</span></div><div><textarea id="txtJust"></textarea></div></div>
+    <div class="row">
+      <div class="lbl">Business justification <span class="star">*</span></div>
+      <div>
+        <textarea id="txtJust" placeholder="Explain briefly why this access is needed…"></textarea>
+        <div id="justErr" class="warn" style="display:none">Business justification is required.</div>
+      </div>
+    </div>
     <div class="actions">
       <button class="btn ghost" id="btnBack1">Back</button>
-      <button class="btn" id="btnSubmitTitle">Submit</button>
+      <button class="btn ghost" id="btnClose2">Close</button>
+      <button class="btn" id="btnSubmitTitle" disabled>Submit</button>
     </div>
   </section>
 </div>
@@ -156,13 +166,16 @@
 <div class="modal" id="mFeedback">
   <div class="sheet" style="width:min(520px,95vw)">
     <div class="hd">Feedback</div>
-    <div class="bd"><div class="hint" style="margin:0 0 6px">Optional: share quick feedback about this flow.</div><textarea id="txtFb" placeholder="Type a few lines…"></textarea></div>
+    <div class="bd">
+      <div class="hint" style="margin:0 0 6px">Optional: share quick feedback about this flow.</div>
+      <textarea id="txtFb" style="width:100%"></textarea>
+    </div>
     <div class="ft"><button class="btn ghost w" id="mfCancel">Cancel</button><button class="btn w" id="mfOk">OK</button></div>
   </div>
 </div>
 
 <script>
-/* ===== Demo data (User1 + User3 clubbed) ===== */
+/* ===== Demo users (User1 + User3 clubbed) ===== */
 const USERS = [
   { loginuser:"User1", alias:"akanoo", name:"User Display" },
   { loginuser:"User1", alias:"jdoe",   name:"User Display" },
@@ -186,7 +199,7 @@ const USERS = [
   { loginuser:"User4", alias:"dev_1",  name:"User Display" },
 ].sort((a,b)=>a.alias.localeCompare(b.alias));
 
-/* ===== elements ===== */
+/* ===== sections & controls ===== */
 const sec0=document.getElementById('sec-prereq');
 const secSearch=document.getElementById('sec-search');
 const secTitle=document.getElementById('sec-title');
@@ -200,16 +213,16 @@ document.getElementById('agDone').onclick=()=>{agState.textContent='Completed';a
 document.getElementById('trDone').onclick=()=>{trState.textContent='Completed';trState.className='pill';checkPrereq();}
 document.getElementById('btnClose0').onclick=closeTask;
 document.getElementById('btnNext0').onclick=()=>{sec0.style.display='none';secSearch.style.display='block';};
-
-/* In prod, set these from your API/Flow on load */
-// TODO (pull): fetch pre-req status -> set agState/trState text to 'Completed' or 'Pending'
-function checkPrereq(){
-  const ok = agState.textContent==='Completed' && trState.textContent==='Completed';
-  btnNext0.disabled=!ok;
-}
+function checkPrereq(){ btnNext0.disabled = !(agState.textContent==='Completed' && trState.textContent==='Completed'); }
 checkPrereq();
 
-/* ===== search page ===== */
+/* Back buttons */
+document.getElementById('btnBack0').onclick=()=>{secSearch.style.display='none';sec0.style.display='block';};
+document.getElementById('btnBack1').onclick=()=>{secTitle.style.display='none';secSearch.style.display='block';};
+document.getElementById('btnClose1').onclick=closeTask;
+document.getElementById('btnClose2').onclick=closeTask;
+
+/* ===== Search screen ===== */
 const ddLogin=document.getElementById('ddLogin');
 const ddTop=document.getElementById('ddTop');
 const txtQ=document.getElementById('txtQ');
@@ -221,9 +234,8 @@ const chips=document.getElementById('selChips');
 const dt=document.getElementById('dtDuration');
 const dtErr=document.getElementById('dtError');
 const btnNext=document.getElementById('btnNext');
-document.getElementById('btnClose1').onclick=closeTask;
 
-/* populate login list */
+/* Populate login dropdown */
 (function(){
   const set=new Set(USERS.map(u=>u.loginuser));
   ddLogin.innerHTML=['All',...set].map(u=>`<option>${u}</option>`).join('');
@@ -231,23 +243,52 @@ document.getElementById('btnClose1').onclick=closeTask;
 
 const selected=new Set();
 
-/* date helpers & validation */
-function todayISO(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString().slice(0,10)}
-function fiscalEndISO(){const now=new Date();const start=new Date(now.getMonth()>=6?now.getFullYear():now.getFullYear()-1,6,25);const end=new Date(start.getFullYear()+1,5,26);return end.toISOString().slice(0,10)}
-dt.value=todayISO();dt.max=fiscalEndISO(); // clear sets today (invalid) by design
-dt.addEventListener('change',validateDuration);
-
-function validateDuration(){
-  const t=new Date(todayISO()), v=new Date(dt.value), max=new Date(dt.max);
-  let ok=true,msg='';
-  if(!dt.value){ok=false;msg='Please choose a date.'}
-  else if(v<=t){ok=false;msg='Date must be after today.'}
-  else if(v>max){ok=false;msg=`Date must be on or before ${dt.max}.`}
-  dtErr.style.display=ok?'none':'block'; dtErr.textContent=ok?'':msg;
-  updateNextState(); return ok;
+/* === India time helpers === */
+function isoFromIST(d){ // returns YYYY-MM-DD from a Date treated in IST
+  const tz='Asia/Kolkata';
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+  const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+  return `${map.year}-${map.month}-${map.day}`;
+}
+function istTodayISO(){ return isoFromIST(new Date()); }
+function istFiscalEndISO(){
+  // FY: Jul 25 (Y) to Jun 26 (Y+1) in IST
+  const now=new Date();
+  // month is 0-index: 6 = July
+  const tz='Asia/Kolkata';
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric'}).formatToParts(now);
+  const year=Number(parts.find(p=>p.type==='year').value);
+  const afterJul24 = (new Date().getMonth()>6) || (new Date().getMonth()===6 && new Date().getDate()>=25);
+  const startYear = afterJul24 ? year : year-1;
+  const end = new Date(Date.UTC(startYear+1,5,26,0,0,0)); // Jun 26
+  return isoFromIST(end);
 }
 
-/* search */
+/* init date; no error until touched */
+let dtTouched=false;
+dt.max=istFiscalEndISO();
+dt.addEventListener('change',()=>{dtTouched=true;validateDuration(true);});
+dt.addEventListener('input',()=>{dtTouched=true;validateDuration(true);});
+
+function validateDuration(showImmediately=false){
+  const today=istTodayISO();
+  const max=dt.max;
+  const v=dt.value;
+
+  let ok=true,msg='';
+  if(!v){ ok=false; msg='Please choose a date.'; }
+  else if(v<=today){ ok=false; msg='Date must be after today (IST).'; }
+  else if(v>max){ ok=false; msg=`Date must be on or before ${max}.`; }
+
+  const shouldShow = showImmediately || dtTouched;
+  dtErr.style.display = ok || !shouldShow ? 'none' : 'block';
+  dtErr.textContent  = ok ? '' : msg;
+
+  updateNextState();
+  return ok;
+}
+
+/* search render */
 function pool(){return ddLogin.value==='All'?USERS:USERS.filter(u=>u.loginuser===ddLogin.value)}
 function runSearch(){
   const q=txtQ.value.trim().toLowerCase();
@@ -269,14 +310,18 @@ function rebuildChips(){
   document.querySelectorAll('[data-add]').forEach(b=>{const a=b.getAttribute('data-add');const s=selected.has(a);b.disabled=s;b.textContent=s?'Added':'Add'});
   updateNextState();
 }
-function updateNextState(){ btnNext.disabled = !(selected.size>0 && !dtErr.textContent && dt.value) }
+function updateNextState(){
+  const justOk = document.getElementById('txtJust').value.trim().length>0;
+  btnNext.disabled = !(selected.size>0 && !dtErr.textContent && dt.value);
+  document.getElementById('btnSubmitTitle').disabled = !justOk;
+}
 
 btnSearch.onclick=runSearch;
 ddLogin.onchange=runSearch;
 ddTop.onchange=runSearch;
 txtQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runSearch()}});
 
-btnClear.onclick=()=>{ txtQ.value=''; dt.value=todayISO(); validateDuration(); runSearch(); };
+btnClear.onclick=()=>{ txtQ.value=''; dt.value=''; dtTouched=false; dtErr.style.display='none'; runSearch(); };
 
 document.addEventListener('click',e=>{
   const a=e.target.getAttribute?.('data-add'); if(a){selected.add(a); rebuildChips(); return;}
@@ -288,23 +333,33 @@ const mConfirm=document.getElementById('mConfirm');
 const confirmTxt=document.getElementById('confirmTxt');
 document.getElementById('mcCancel').onclick=()=>mConfirm.classList.remove('show');
 document.getElementById('mcOk').onclick=()=>{mConfirm.classList.remove('show'); secSearch.style.display='none'; secTitle.style.display='block';
-  // TODO (pull): hydrate current title / dropdowns from backend with selected aliases + date
+  // TODO (pull): hydrate current title/dropdown from backend using selection + date
 };
 btnNext.onclick=()=>{
-  if(!validateDuration()||selected.size===0) return;
-  const when=dt.value.split('-').reverse().join('/');
+  if(!(validateDuration(true) && selected.size>0)) return;
+  const [y,m,d]=dt.value.split('-'); const when=`${d}/${m}/${y}`;
   confirmTxt.innerHTML=`<div>Following users are selected for <b>${when}</b>:</div><div style="margin-top:6px">${[...selected].sort().map(a=>`<div>• <code>${a}</code></div>`).join('')}</div>`;
   mConfirm.classList.add('show');
 };
 
-/* Title/Justification submit + feedback */
-document.getElementById('btnBack1').onclick=()=>{secTitle.style.display='none';secSearch.style.display='block'};
-const mFeedback=document.getElementById('mFeedback');
+/* ===== Title / justification (inline validation) ===== */
+const txtJust=document.getElementById('txtJust');
+const justErr=document.getElementById('justErr');
+txtJust.addEventListener('input',()=>{
+  const ok=txtJust.value.trim().length>0;
+  justErr.style.display= ok ? 'none' : 'block';
+  updateNextState();
+});
 document.getElementById('btnSubmitTitle').onclick=()=>{
-  const just=document.getElementById('txtJust').value.trim();
-  if(!just){alert('Business justification is required.');return;}
+  const ok = txtJust.value.trim().length>0;
+  justErr.style.display = ok ? 'none' : 'block';
+  if(!ok) return;
+  // proceed to optional feedback
   mFeedback.classList.add('show');
 };
+
+/* Feedback modal */
+const mFeedback=document.getElementById('mFeedback');
 document.getElementById('mfCancel').onclick=()=>mFeedback.classList.remove('show');
 document.getElementById('mfOk').onclick=()=>{
   mFeedback.classList.remove('show');
@@ -314,21 +369,21 @@ document.getElementById('mfOk').onclick=()=>{
     aliases:[...selected].sort(),
     duration:dt.value,
     newTitle:document.getElementById('ddTitles').value,
-    justification:document.getElementById('txtJust').value.trim(),
+    justification:txtJust.value.trim(),
     feedback:document.getElementById('txtFb').value.trim()
   };
-  // TODO (push): send payload to Power Automate / API to persist into Azure SQL
+  // TODO (push): send payload to Power Automate / API for Azure SQL persistence
   closeTask(payload);
 };
 
-/* close helper */
+/* Close helper */
 function closeTask(payload={}){
   try{ if(window.microsoftTeams?.tasks?.submitTask){ window.microsoftTeams.tasks.submitTask(payload); return; } }catch(e){}
   try{ window.parent.postMessage({type:'tm-close',payload},'*'); }catch(e){}
 }
 
-/* init */
-validateDuration(); runSearch();
+/* init screen */
+validateDuration(false); runSearch();
 </script>
 </body>
 </html>
