@@ -1,234 +1,264 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Request Actual Access — Search</title>
-
-  <!-- Minimal styling via Bootstrap (ok for PoC) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Teams JS SDK (lets Submit/Close return data to the task module parent) -->
-  <script src="https://res.cdn.office.net/teams-js/v2.15.0/js/MicrosoftTeams.min.js"></script>
-
-  <style>
-    body { background:#f8fafc; }
-    .card { border-radius:14px; }
-    .table thead th { font-weight:600; }
-    .pill { display:inline-block; padding:.15rem .5rem; border-radius:999px; background:#eef5ff; }
-    .sticky-actions { position:sticky; bottom:0; background:#fff; padding:.75rem 1rem; border-top:1px solid #e9ecef; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Request Actual Access — Search</title>
+<style>
+  :root{
+    --teams-bg:#f5f5f7;
+    --card:#ffffff;
+    --text:#242424;
+    --muted:#616161;
+    --border:#e0e0e0;
+    --primary:#2563eb;        /* Teams-ish primary */
+    --primary-pressed:#1e4fc7;
+    --secondary:#e9eef7;
+    --radius:14px;
+  }
+  html,body{margin:0;height:100%;font-family:Segoe UI, Arial, sans-serif;background:var(--teams-bg);color:var(--text)}
+  .wrap{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:32px}
+  .card{width:min(1100px,95vw);background:var(--card);border:1px solid var(--border);
+        border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06);padding:24px 24px 16px}
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .title{font-size:20px;font-weight:700}
+  .toolbar{display:grid;gap:12px;grid-template-columns: 260px 160px 1fr 110px}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+  select,input[type="text"]{
+    width:100%;height:40px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-size:14px;
+    background:#fff;outline:none;
+  }
+  .btn{height:40px;border:0;border-radius:10px;cursor:pointer;font-weight:600;padding:0 16px}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-pressed)}
+  .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--text)}
+  .btn-row{display:flex;gap:10px;margin-top:12px}
+  .muted{color:var(--muted);font-size:12px;margin-top:8px}
+  table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:18px}
+  thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 12px}
+  tbody tr{background:#fff;border:1px solid var(--border);border-radius:12px}
+  tbody td{padding:12px}
+  tbody tr td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+  tbody tr td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+  .pill{display:inline-block;background:#eef2ff;color:#1e40af;border-radius:999px;padding:2px 10px;font-size:12px}
+  .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+  .count{font-size:12px;color:var(--muted)}
+  .sep{height:1px;background:var(--border);margin:14px 0}
+  .footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+  .hidden{display:none}
+</style>
 </head>
 <body>
-  <div class="container py-4">
-    <h1 class="h4 fw-semibold mb-3">Request Actual Access — Search</h1>
+<div class="wrap">
+  <div class="card" role="dialog" aria-label="Request Actual Access — Search">
+    <div class="header">
+      <div class="title">Request Actual Access — Search</div>
+      <div class="count"><span id="selCount">0</span> selected</div>
+    </div>
 
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <form id="searchForm" class="row g-3 align-items-end">
-          <div class="col-md-3">
-            <label class="form-label">Login user</label>
-            <select id="loginUser" class="form-select">
-              <option>User1</option>
-              <option>User2</option>
-              <option>User3</option>
-              <option>User4</option>
-            </select>
-          </div>
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div>
+        <label>Login User</label>
+        <select id="loginUser">
+          <option value="All" selected>All (User1 + User3)</option>
+          <option value="User1">User1</option>
+          <option value="User2">User2</option>
+          <option value="User3">User3</option>
+          <option value="User4">User4</option>
+        </select>
+      </div>
 
-          <div class="col-md-2">
-            <label class="form-label">Show</label>
-            <select id="showCount" class="form-select">
-              <option value="10">10</option>
-              <option value="20" selected>20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
+      <div>
+        <label>Show</label>
+        <select id="showCount">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
 
-          <div class="col-md-5">
-            <label class="form-label">Search alias or name</label>
-            <div class="input-group">
-              <input id="query" class="form-control" placeholder="e.g. akanoo or Ashish" />
-              <button id="btnSearch" class="btn btn-primary" type="submit">Search</button>
-            </div>
-          </div>
+      <div>
+        <label>Search alias or name</label>
+        <input id="query" type="text" placeholder="e.g., akanoo or Ashish Kanoongo" />
+      </div>
 
-          <div class="col-md-2 d-flex gap-2 justify-content-end">
-            <button id="btnCloseTop" class="btn btn-outline-secondary" type="button">Close</button>
-            <button id="btnSubmitTop" class="btn btn-success" type="button">Submit</button>
-          </div>
-        </form>
+      <div class="right">
+        <button id="btnSearch" class="btn primary" title="Filter list">Search</button>
+      </div>
+    </div>
 
-        <hr class="my-3" />
+    <div class="muted">
+      • Search is **button-based** (no type-ahead) for performance. • Filters on alias or name. • Always sorted by alias (A→Z).
+    </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div><span id="resultCount" class="pill">0 results</span></div>
-          <small class="text-muted">Tip: use the **Show** dropdown to cap results for the demo.</small>
-        </div>
+    <div class="sep"></div>
 
-        <div class="table-responsive">
-          <table class="table table-hover align-middle" id="resultTable">
-            <thead>
-              <tr>
-                <th style="width:48px;"></th>
-                <th>Alias</th>
-                <th>Name</th>
-              </tr>
-            </thead>
-            <tbody id="resultBody">
-              <!-- rows inserted by JS -->
-            </tbody>
-          </table>
-        </div>
+    <!-- Results -->
+    <div id="results">
+      <table aria-label="Search results">
+        <thead>
+          <tr>
+            <th style="width:44px;"><input id="chkAll" type="checkbox" title="Select all on page" /></th>
+            <th style="width:140px;">Alias</th>
+            <th>Name</th>
+            <th style="width:160px;">Login User</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
 
-        <div class="sticky-actions d-flex justify-content-between">
-          <div class="text-muted small" id="selectionInfo">Nothing selected</div>
-          <div class="d-flex gap-2">
-            <button id="btnClose" class="btn btn-outline-secondary" type="button">Close</button>
-            <button id="btnSubmit" class="btn btn-primary" type="button">Submit</button>
-          </div>
-        </div>
-
+    <div class="footer">
+      <span class="muted">Tip: press Search after changing any field.</span>
+      <div class="right">
+        <button class="btn ghost" onclick="window.close()">Close</button>
+        <button id="btnSubmit" class="btn primary">Submit</button>
       </div>
     </div>
   </div>
+</div>
 
 <script>
-/* ---------- Demo dataset (static) ---------- */
-const USERS = [
-  { loginuser: "User1", alias: "akanoo", name: "Ashish Kanoongo" },
-  { loginuser: "User1", alias: "jdoe",   name: "John Doe" },
-  { loginuser: "User1", alias: "mshah",  name: "Meera Shah" },
-  { loginuser: "User1", alias: "sgeorge",name: "Sam George" },
-  { loginuser: "User1", alias: "pk",     name: "Priya K" },
-  { loginuser: "User1", alias: "alexr",  name: "Alex R" },
-  { loginuser: "User1", alias: "chenl",  name: "Chen Li" },
+/* ---------- Static dataset (POC) ---------- */
+const DATA = [
+  { loginuser:"User1", alias:"akanoo",  name:"Ashish Kanoongo" },
+  { loginuser:"User1", alias:"jdoe",    name:"John Doe" },
+  { loginuser:"User1", alias:"mshah",   name:"Meera Shah" },
+  { loginuser:"User1", alias:"sgeorge", name:"Sam George" },
+  { loginuser:"User1", alias:"pk",      name:"Priya K" },
+  { loginuser:"User1", alias:"alexr",   name:"Alex R" },
+  { loginuser:"User1", alias:"chenl",   name:"Chen Li" },
 
-  { loginuser: "User2", alias: "katew",  name: "Kate W" },
-  { loginuser: "User2", alias: "omarh",  name: "Omar H" },
-  { loginuser: "User2", alias: "sarab",  name: "Sara B" },
-  { loginuser: "User2", alias: "timq",   name: "Tim Q" },
-  { loginuser: "User2", alias: "ninad",  name: "Nina D" },
-  { loginuser: "User2", alias: "vikz",   name: "Vik Z" },
+  { loginuser:"User2", alias:"katew",   name:"Kate W" },
+  { loginuser:"User2", alias:"omarh",   name:"Omar H" },
+  { loginuser:"User2", alias:"sarab",   name:"Sara B" },
+  { loginuser:"User2", alias:"timq",    name:"Tim Q" },
+  { loginuser:"User2", alias:"ninad",   name:"Nina D" },
+  { loginuser:"User2", alias:"vikz",    name:"Vik Z" },
 
-  { loginuser: "User3", alias: "liamj",  name: "Liam J" },
-  { loginuser: "User3", alias: "isham",  name: "Isha M" },
-  { loginuser: "User3", alias: "ravin",  name: "Ravi N" },
-  { loginuser: "User3", alias: "olgap",  name: "Olga P" },
+  { loginuser:"User3", alias:"liamj",   name:"Liam J" },
+  { loginuser:"User3", alias:"isham",   name:"Isha M" },
+  { loginuser:"User3", alias:"ravin",   name:"Ravi N" },
+  { loginuser:"User3", alias:"olgap",   name:"Olga P" },
 
-  { loginuser: "User4", alias: "zedx",   name: "Zed X" },
-  { loginuser: "User4", alias: "riak",   name: "Riak" },
-  { loginuser: "User4", alias: "dev_1",  name: "Dev One" }
+  { loginuser:"User4", alias:"zedx",    name:"Zed X" },
+  { loginuser:"User4", alias:"riak",    name:"Riak" },
+  { loginuser:"User4", alias:"dev_1",   name:"Dev One" },
 ];
 
-/* ---------- Utilities ---------- */
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
+/* ---------- Elements ---------- */
+const elLogin   = document.getElementById('loginUser');
+const elShow    = document.getElementById('showCount');
+const elQuery   = document.getElementById('query');
+const elRows    = document.getElementById('rows');
+const elSelCnt  = document.getElementById('selCount');
+const elChkAll  = document.getElementById('chkAll');
 
-function getQueryParams() {
-  const p = new URLSearchParams(location.search);
-  return {
-    loginuser: p.get("loginuser") || "",
-    show: parseInt(p.get("show") || "20", 10),
-    q: p.get("q") || ""
-  };
+/* ---------- Helpers ---------- */
+const qs = new URLSearchParams(location.search);
+function initFromQuery(){
+  // Preselect from querystring if provided
+  const qUser = qs.get('loginuser');
+  const qShow = qs.get('show');
+  const qText = qs.get('q');
+
+  if (qUser) {
+    // Support "All" and user keys; keep “All (User1+User3)” label.
+    if (["All","User1","User2","User3","User4"].includes(qUser)) {
+      elLogin.value = qUser;
+    }
+  }
+  if (qShow && !Number.isNaN(+qShow)) elShow.value = qShow;
+  if (qText) elQuery.value = qText;
 }
 
-function filterUsers(loginUser, q, cap) {
-  const lcq = q.trim().toLowerCase();
-  let rows = USERS.filter(u => !loginUser || u.loginuser === loginUser);
-  if (lcq) {
-    rows = rows.filter(u =>
-      u.alias.toLowerCase().includes(lcq) ||
-      u.name.toLowerCase().includes(lcq)
+function currentDataset(){
+  if (elLogin.value === "All") {
+    // Club User1 + User3 as requested
+    return DATA.filter(x => x.loginuser === "User1" || x.loginuser === "User3");
+  }
+  return DATA.filter(x => x.loginuser === elLogin.value);
+}
+
+function search(){
+  const q = (elQuery.value || "").trim().toLowerCase();
+  let list = currentDataset();
+
+  if (q){
+    list = list.filter(x =>
+      x.alias.toLowerCase().includes(q) ||
+      (x.name||"").toLowerCase().includes(q)
     );
   }
-  return rows.slice(0, cap);
+
+  // Sort by alias A→Z always
+  list.sort((a,b)=> a.alias.localeCompare(b.alias));
+
+  // Page size
+  const take = Math.max(1, +elShow.value || 20);
+  render(list.slice(0, take));
 }
 
-function render(rows) {
-  const body = $("#resultBody");
-  body.innerHTML = "";
-  rows.forEach((u, idx) => {
-    const tr = document.createElement("tr");
+function render(items){
+  elRows.innerHTML = "";
+  elChkAll.checked = false;
+  updateCount();
+
+  if (!items.length){
+    elRows.innerHTML = `<tr><td colspan="4" class="muted" style="padding:18px;">No results.</td></tr>`;
+    return;
+  }
+
+  for (const it of items){
+    const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input class="form-check-input row-check" type="checkbox" data-alias="${u.alias}" data-name="${u.name}"></td>
-      <td><code>${u.alias}</code></td>
-      <td>${u.name}</td>
+      <td><input type="checkbox" class="rowchk" data-alias="${it.alias}"></td>
+      <td><span class="pill">${it.alias}</span></td>
+      <td>${escapeHtml(it.name||"")}</td>
+      <td>${it.loginuser}</td>
     `;
-    body.appendChild(tr);
-  });
-  $("#resultCount").textContent = `${rows.length} result${rows.length===1?"":"s"}`;
-  updateSelectionInfo();
-}
+    elRows.appendChild(tr);
+  }
 
-function getSelection() {
-  const checks = $$(".row-check:checked");
-  return checks.map(c => ({ alias: c.dataset.alias, name: c.dataset.name }));
-}
-
-function updateSelectionInfo() {
-  const sel = getSelection();
-  $("#selectionInfo").textContent = sel.length
-    ? `Selected: ${sel.map(s => s.alias).join(", ")}`
-    : "Nothing selected";
-}
-
-/* ---------- Teams integration (for Submit/Close) ---------- */
-let inTeams = false;
-if (window.microsoftTeams && microsoftTeams.app) {
-  microsoftTeams.app.initialize().then(() => {
-    inTeams = true;
-  }).catch(() => { /* non-Teams browser */ });
-}
-
-function submitToParent(payload) {
-  if (inTeams && microsoftTeams.tasks) {
-    microsoftTeams.tasks.submitTask(payload); // returns to parent (bot/card)
-  } else {
-    // Non-Teams fallback: just show what would be returned
-    alert("Submit payload:\n" + JSON.stringify(payload, null, 2));
+  // Selection handlers
+  for (const cb of document.querySelectorAll('.rowchk')){
+    cb.addEventListener('change', updateCount);
   }
 }
 
-/* ---------- Wire up UI ---------- */
-document.addEventListener("change", e => {
-  if (e.target.classList.contains("row-check")) updateSelectionInfo();
+function updateCount(){
+  const n = document.querySelectorAll('.rowchk:checked').length;
+  elSelCnt.textContent = n;
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* ---------- Events ---------- */
+document.getElementById('btnSearch').addEventListener('click', search);
+elLogin.addEventListener('change', search);
+elShow.addEventListener('change', search);
+elChkAll.addEventListener('change', () => {
+  const checks = document.querySelectorAll('.rowchk');
+  for (const cb of checks) cb.checked = elChkAll.checked;
+  updateCount();
 });
 
-$("#btnCloseTop").onclick = $("#btnClose").onclick = () => {
-  submitToParent({ cancelled: true });
-};
-
-$("#btnSubmitTop").onclick = $("#btnSubmit").onclick = () => {
-  const selected = getSelection();
-  submitToParent({
-    cancelled: false,
-    action: "tmSearchSubmit",
-    loginUser: $("#loginUser").value,
-    selected
-  });
-};
-
-$("#searchForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const rows = filterUsers(
-    $("#loginUser").value,
-    $("#query").value,
-    parseInt($("#showCount").value, 10)
-  );
-  render(rows);
+document.getElementById('btnSubmit').addEventListener('click', () => {
+  const picked = [...document.querySelectorAll('.rowchk:checked')].map(x=>x.dataset.alias);
+  // POC: show what we’d return to the bot/task module
+  alert(`Submitting ${picked.length} selection(s): ${picked.join(', ') || '(none)'}`);
+  // In production, postMessage to Teams/Parent or call your API here.
 });
 
-/* ---------- Initial load (use query params if present) ---------- */
-(function init() {
-  const qp = getQueryParams();
-  if (qp.loginuser) $("#loginUser").value = qp.loginuser;
-  if (qp.show) $("#showCount").value = String(qp.show);
-  if (qp.q) $("#query").value = qp.q;
-
-  const rows = filterUsers($("#loginUser").value, $("#query").value, parseInt($("#showCount").value, 10));
-  render(rows);
-})();
+/* ---------- Boot ---------- */
+initFromQuery();
+search();
 </script>
 </body>
 </html>
